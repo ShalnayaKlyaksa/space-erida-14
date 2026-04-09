@@ -61,6 +61,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly SharedAppearanceSystem _appearance = default!;
 
+
     private readonly HashSet<Entity<StationAiCoreComponent>> _stationAiCores = new();
 
     private readonly ProtoId<ChatNotificationPrototype> _turretIsAttackingChatNotificationPrototype = "TurretIsAttacking";
@@ -120,7 +121,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
                 // Set the new AI brain to the 'rebooting' state
                 if (TryComp<StationAiCustomizationComponent>(aiBrain, out var customization))
                     SetStationAiState((aiBrain, customization), StationAiState.Rebooting);
-                
+
             }
 
             // Delete the new AI brain if it cannot be inserted into the core

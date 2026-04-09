@@ -14,15 +14,18 @@ public sealed partial class StationAiSystem
 
     private void OnBorgGetRadial(Entity<BorgChassisComponent> ent, ref GetStationAiRadialEvent args)
     {
-        args.Actions.Add(new StationAiRadial
+        if (HasComp<BorgControlComponent>(ent.Owner))
         {
-            Sprite = new SpriteSpecifier.Rsi(_aiActionsRsi, "ai_core"),
-            Tooltip = Loc.GetString("station-ai-borg-control"),
-            Event = new StationAiControlBorgEvent
+            args.Actions.Add(new StationAiRadial
             {
-                TakeControl = true
-            }
-        });
+                Sprite = new SpriteSpecifier.Rsi(_aiActionsRsi, "ai_core"),
+                Tooltip = Loc.GetString("station-ai-borg-control"),
+                Event = new StationAiControlBorgEvent
+                {
+                    TakeControl = true
+                }
+            });
+        }
 
         if (!TryComp<LockComponent>(ent.Owner, out var lockComp))
             return;

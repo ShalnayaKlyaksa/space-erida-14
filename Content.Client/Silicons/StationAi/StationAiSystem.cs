@@ -20,7 +20,8 @@ public sealed partial class StationAiSystem : SharedStationAiSystem
         base.Initialize();
         InitializeAirlock();
         InitializePowerToggle();
-        InitializeBorgControl();
+
+        InitializeBorgControl(); // init StationAI borg control from Erida
 
         SubscribeLocalEvent<StationAiOverlayComponent, LocalPlayerAttachedEvent>(OnAiAttached);
         SubscribeLocalEvent<StationAiOverlayComponent, LocalPlayerDetachedEvent>(OnAiDetached);

@@ -33,7 +33,6 @@
   - type: MovementSpeedModifier
     baseWalkSpeed : 2.5
     baseSprintSpeed : 4.5
-  - type: StationAiWhitelist
   - type: Sprite
     sprite: Mobs/Silicon/chassis.rsi
   - type: RotationVisuals
@@ -111,7 +110,6 @@
     fuelCost: 0.5
     allowSelfRepair: false
   - type: BorgChassis
-  - type: BorgControl
   - type: LockingWhitelist
     blacklist:
       components:
@@ -333,6 +331,7 @@
   - type: RandomMetadata
     nameSegments:
     - NamesBorg
+  - type: StationAiWhitelist
   - type: NpcFactionMember
     factions:
     - NanoTrasen
@@ -348,6 +347,7 @@
   - type: InteractionPopup
     interactSuccessSound:
       path: /Audio/Ambience/Objects/periodic_beep.ogg
+  - type: BorgControl
 
 - type: entity
   id: BaseBorgChassisSyndicate

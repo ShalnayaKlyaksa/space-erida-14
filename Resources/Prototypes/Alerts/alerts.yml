@@ -163,6 +163,13 @@
   description: alerts-handcuffed-desc
 
 - type: alert
+  id: Collared
+  clickEvent: !type:RemoveCollarAlertEvent
+  icons: [ /Textures/_Erida/Clothing/Neck/Misc/petcollar.rsi/icon.png ]
+  name: alerts-collared-name
+  description: alerts-collared-desc
+
+- type: alert
   id: Ensnared
   clickEvent: !type:RemoveEnsnareAlertEvent
   icons:

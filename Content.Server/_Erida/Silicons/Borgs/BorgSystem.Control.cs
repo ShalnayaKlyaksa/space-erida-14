@@ -1,5 +1,7 @@
 using Content.Server.Administration.Logs;
 using Content.Shared.Actions;
+using Content.Shared.Access.Components;
+using Content.Shared.Access.Systems;
 using Content.Shared.Database;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Lock;
@@ -18,6 +20,7 @@ public sealed partial class BorgSystem
     private const string ReturnToCoreAction = "ActionStationAiReturnToCore";
 
     [Dependency] private readonly SharedActionsSystem _actions = default!;
+    [Dependency] private readonly SharedAccessSystem _access = default!; //Fix Access borg StationAI from Erida
     [Dependency] private readonly IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly LockSystem _lock = default!;
@@ -81,8 +84,15 @@ public sealed partial class BorgSystem
 
         control.OriginalAi = args.User;
 
+        if (TryComp<AccessComponent>(ent.Owner, out var access))
+        {
+            control.OriginalAccessEnabled = access.Enabled;
+            _access.SetAccessEnabled(ent.Owner, true, access);
+        }
+
         if (!_actions.AddAction(ent.Owner, ref control.ReturnToAiAction, ReturnToCoreAction, ent.Owner))
         {
+            RestoreAccess((ent.Owner, control));
             control.OriginalAi = null;
             _mindSystem.UnVisit(aiMindId, aiMind);
             PopupStationAi(args.User, "ai-device-not-responding");
@@ -185,9 +195,21 @@ public sealed partial class BorgSystem
 
     private void ClearStationAiControl(Entity<BorgControlComponent> ent)
     {
+        RestoreAccess(ent);
         _actions.RemoveAction(ent.Comp.ReturnToAiAction);
         ent.Comp.ReturnToAiAction = null;
         ent.Comp.OriginalAi = null;
+    }
+
+    private void RestoreAccess(Entity<BorgControlComponent> ent)
+    {
+        if (ent.Comp.OriginalAccessEnabled is not { } accessEnabled)
+            return;
+
+        if (TryComp<AccessComponent>(ent.Owner, out var access))
+            _access.SetAccessEnabled(ent.Owner, accessEnabled, access);
+
+        ent.Comp.OriginalAccessEnabled = null;
     }
 
     private void PopupStationAi(EntityUid user, string message)

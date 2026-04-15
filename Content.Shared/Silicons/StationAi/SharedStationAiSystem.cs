@@ -22,6 +22,8 @@ using Content.Shared.Power;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Repairable;
 using Content.Shared.StationAi;
+using Content.Shared.Storage.Components;
+using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Verbs;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
@@ -52,6 +54,7 @@ public abstract partial class SharedStationAiSystem : EntitySystem
     [Dependency] private readonly SharedContainerSystem _containers = default!;
     [Dependency] private readonly SharedDoorSystem _doors = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private readonly SharedEntityStorageSystem _entityStorage = default!;
     [Dependency] private readonly SharedElectrocutionSystem _electrify = default!;
     [Dependency] private readonly SharedEyeSystem _eye = default!;
     [Dependency] protected readonly SharedMapSystem Maps = default!;
@@ -89,6 +92,7 @@ public abstract partial class SharedStationAiSystem : EntitySystem
         InitializeHeld();
         InitializeLight();
         InitializeCustomization();
+        InitializeBorgCharger();
 
         SubscribeLocalEvent<StationAiWhitelistComponent, BoundUserInterfaceCheckRangeEvent>(OnAiBuiCheck);
 
@@ -645,6 +649,28 @@ public abstract partial class SharedStationAiSystem : EntitySystem
 
             aliveAis.Add((mind, mindComp));
         }
+    }
+}
+
+public abstract partial class SharedStationAiSystem
+{
+    private void InitializeBorgCharger()
+    {
+        SubscribeLocalEvent<EntityStorageComponent, StationAiToggleBorgChargerEvent>(OnToggleBorgCharger);
+    }
+
+    private void OnToggleBorgCharger(Entity<EntityStorageComponent> ent, ref StationAiToggleBorgChargerEvent args)
+    {
+        if (!PowerReceiver.IsPowered(ent.Owner))
+        {
+            ShowDeviceNotRespondingPopup(args.User);
+            return;
+        }
+
+        if (ent.Comp.Open)
+            _entityStorage.TryCloseStorage(ent.Owner, args.User);
+        else
+            _entityStorage.OpenStorage(ent.Owner, ent.Comp);
     }
 }
 

@@ -155,6 +155,7 @@
     - id: MedkitOxygenFilled
     - id: HolofanProjector
     - id: RCD
+    - id: RPD
     - id: RCDAmmo
     - id: AirGrenade
     - id: PlushieLizardJobAtmospherictechnician
@@ -200,6 +201,7 @@
     - id: ClothingMaskGas
     - id: trayScanner
     - id: RCD
+    - id: RPD
     - id: RCDAmmo
     - id: MetalFoamGrenade
     - id: PlushieLizardJobTechnicalassistant

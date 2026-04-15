@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using Content.Shared._Erida.Leash.Components;
 using Content.Shared._Goobstation.TileMovement;
 using Content.Shared.ActionBlocker;
 using Content.Shared.CCVar;
@@ -211,7 +212,7 @@ public abstract partial class SharedMoverController : VirtualController
         // If we can't move then just use tile-friction / no movement handling.
         if (!mover.CanMove
             || !PhysicsQuery.TryComp(uid, out var physicsComponent)
-            || PullableQuery.TryGetComponent(uid, out var pullable) && pullable.BeingPulled)
+            || PullableQuery.TryGetComponent(uid, out var pullable) && pullable.BeingPulled && !HasComp<CollarWearerComponent>(uid))
         {
             UsedMobMovement[uid] = false;
             return;

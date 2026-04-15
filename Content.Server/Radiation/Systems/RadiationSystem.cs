@@ -144,9 +144,20 @@ public sealed partial class RadiationSystem : EntitySystem
         if (_accumulator < GridcastUpdateRate)
             return;
 
+        RefreshSources();  // Erida fix SuperMatter Radiation
+
         UpdateGridcast();
         UpdateResistanceDebugOverlay();
         _accumulator = 0f;
+    }
+
+    private void RefreshSources()
+    {
+        var query = EntityQueryEnumerator<RadiationSourceComponent>();
+        while (query.MoveNext(out var uid, out var source))
+        {
+            UpdateSource((uid, source));
+        }
     }
 
     public void IrradiateEntity(EntityUid uid, float radsPerSecond, float time, EntityUid? origin = null)

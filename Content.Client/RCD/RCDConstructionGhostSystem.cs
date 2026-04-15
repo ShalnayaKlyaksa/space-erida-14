@@ -15,6 +15,7 @@ namespace Content.Client.RCD;
 public sealed class RCDConstructionGhostSystem : EntitySystem
 {
     private const string PlacementMode = nameof(AlignRCDConstruction);
+    private const string PipePlacementMode = nameof(Content.Client.Atmos.AlignAtmosPipeLayers);
 
     [Dependency] private readonly IPlayerManager _playerManager = default!;
     [Dependency] private readonly IPlacementManager _placementManager = default!;
@@ -64,15 +65,21 @@ public sealed class RCDConstructionGhostSystem : EntitySystem
             RaiseNetworkEvent(new RCDConstructionGhostRotationEvent(GetNetEntity(heldEntity.Value), _placementDirection));
         }
 
+        var placementMode = prototype.HasLayers && rcd.IsRpd
+            ? PipePlacementMode
+            : PlacementMode;
+
         // If the placer has not changed, exit
-        if (heldEntity == placerEntity && prototype.Prototype == placerProto)
+        if (heldEntity == placerEntity &&
+            prototype.Prototype == placerProto &&
+            _placementManager.CurrentPermission?.PlacementOption == placementMode)
             return;
 
         // Create a new placer
         var newObjInfo = new PlacementInformation
         {
             MobUid = heldEntity.Value,
-            PlacementOption = PlacementMode,
+            PlacementOption = placementMode,
             EntityType = prototype.Prototype,
             Range = (int)Math.Ceiling(SharedInteractionSystem.InteractionRange),
             IsTile = (prototype.Mode == RcdMode.ConstructTile),

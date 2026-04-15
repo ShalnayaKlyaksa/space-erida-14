@@ -22,6 +22,7 @@ public sealed partial class StationAiSystem : SharedStationAiSystem
         InitializePowerToggle();
 
         InitializeBorgControl(); // init StationAI borg control from Erida
+        InitializeBorgCharger(); // init StationAI interact with charger station from Erida
 
         SubscribeLocalEvent<StationAiOverlayComponent, LocalPlayerAttachedEvent>(OnAiAttached);
         SubscribeLocalEvent<StationAiOverlayComponent, LocalPlayerDetachedEvent>(OnAiDetached);

@@ -45,6 +45,12 @@ public sealed partial class RCDPrototype : IPrototype
     public string? Prototype { get; private set; }
 
     /// <summary>
+    /// Whether this build option should use atmos pipe layer placement logic.
+    /// </summary>
+    [DataField, ViewVariables(VVAccess.ReadOnly)]
+    public bool HasLayers { get; private set; }
+
+    /// <summary>
     /// If true, allows placing the entity once per direction (North, West, South and East)
     /// </summary>
     [DataField, ViewVariables(VVAccess.ReadOnly)]

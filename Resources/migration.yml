@@ -828,6 +828,3 @@ CrateVendingMachineRestockChangFilled: VendingMachineRestockChang
 CrateVendingMachineRestockDiscountDansFilled: VendingMachineRestockDiscountDans
 CrateVendingMachineRestockDonutFilled: VendingMachineRestockDonut
 
-Scientific: Experimental
-Engineering: Industrial
-Service: CivilianServices

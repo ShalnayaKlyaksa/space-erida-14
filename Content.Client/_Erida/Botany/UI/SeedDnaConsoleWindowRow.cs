@@ -12,8 +12,6 @@ public sealed class SeedDnaConsoleWindowRow
     private static readonly Thickness LeftRightMargin = new(MarginValue, 0);
     private static readonly Thickness RightMargin = new(MarginValue, 0, 0, 0);
 
-    private bool _isChemical;
-
     private Label? _titleLabel;
     private Label? _seedValueLabel;
     private Label? _dnaDiskValueLabel;
@@ -212,8 +210,6 @@ public sealed class SeedDnaConsoleWindowRow
 
         if (value is SeedChemQuantityDto chem)
         {
-            _isChemical = true;
-
             if (potency == null)
             {
                 valueLabel.Text = "-";

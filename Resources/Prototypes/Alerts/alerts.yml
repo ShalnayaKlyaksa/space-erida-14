@@ -165,7 +165,9 @@
 - type: alert
   id: Collared
   clickEvent: !type:RemoveCollarAlertEvent
-  icons: [ /Textures/_Erida/Clothing/Neck/Misc/petcollar.rsi/icon.png ]
+  icons:
+  - sprite: /Textures/_Erida/Clothing/Neck/Misc/petcollar.rsi
+    state: icon
   name: alerts-collared-name
   description: alerts-collared-desc
 

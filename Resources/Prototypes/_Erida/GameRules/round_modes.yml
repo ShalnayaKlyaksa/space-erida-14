@@ -148,7 +148,7 @@
   id: EridaExtendedDifficultyTwoDynamicRule
   components:
   - type: GameRule
-    minPlayers: 5
+    minPlayers: 1
   - type: DynamicRule
     budgetPerSecond: 0.07
     startingBudgetMin: 150

@@ -29,7 +29,7 @@ public sealed class LeashSystem : EntitySystem
 {
     private static readonly SpriteSpecifier.Rsi LeashVisualSprite =
         new(new ResPath("/Textures/_Erida/Objects/Fun/ERP/leash_line.rsi"), "line");
-    private static readonly Vector2 LeashHolderOffset = new(0f, 0.18f);
+    private static readonly Vector2 LeashHolderOffset = Vector2.Zero;
     private static readonly Vector2 LeashWearerOffset = new(0f, 0.08f);
 
     [Dependency] private readonly AlertsSystem _alerts = default!;

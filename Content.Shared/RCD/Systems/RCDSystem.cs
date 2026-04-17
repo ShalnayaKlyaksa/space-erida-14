@@ -26,6 +26,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
 using System.Linq;
+using System.Numerics;
 
 namespace Content.Shared.RCD.Systems;
 
@@ -49,6 +50,7 @@ public sealed class RCDSystem : EntitySystem
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly TagSystem _tags = default!;
     [Dependency] private readonly SharedAtmosPipeLayersSystem _pipeLayers = default!;
+    private const float RpdCenterDeadzoneRadius = 0.25f;
 
     private readonly int _instantConstructionDelay = 0;
     private readonly EntProtoId _instantConstructionFx = "EffectRCDConstruct0";
@@ -203,9 +205,17 @@ public sealed class RCDSystem : EntitySystem
         }
         var tile = _mapSystem.GetTileRef(gridUid.Value, mapGrid, location);
         var position = _mapSystem.TileIndicesFor(gridUid.Value, mapGrid, location);
-        var pipeLayer = GetPlacementLayer(component, prototype);
+        var pipeLayer = GetPlacementLayer(component, prototype, location, mapGrid, position);
 
-        if (!IsRCDOperationStillValid(uid, component, gridUid.Value, mapGrid, tile, position, component.ConstructionDirection, args.Target, args.User))
+        if (!_net.IsServer &&
+            component.IsRpd &&
+            component.CurrentMode == RpdMode.Free &&
+            TryGetNetEntity(uid, out var netEntity))
+        {
+            RaiseNetworkEvent(new RPDSelectedLayerEvent(netEntity!.Value, (byte) pipeLayer));
+        }
+
+        if (!IsRCDOperationStillValid(uid, component, gridUid.Value, mapGrid, tile, position, component.ConstructionDirection, pipeLayer, args.Target, args.User))
             return;
 
         if (!_net.IsServer)
@@ -317,7 +327,7 @@ public sealed class RCDSystem : EntitySystem
         var tile = _mapSystem.GetTileRef(gridUid, mapGrid, location);
         var position = _mapSystem.TileIndicesFor(gridUid, mapGrid, location);
 
-        if (!IsRCDOperationStillValid(uid, component, gridUid, mapGrid, tile, position, args.Event.Direction, args.Event.Target, args.Event.User, popMsgs: false))
+        if (!IsRCDOperationStillValid(uid, component, gridUid, mapGrid, tile, position, args.Event.Direction, args.Event.PipeLayer, args.Event.Target, args.Event.User, popMsgs: false))
             args.Cancel();
     }
 
@@ -346,7 +356,7 @@ public sealed class RCDSystem : EntitySystem
         var position = _mapSystem.TileIndicesFor(gridUid, mapGrid, location);
 
         // Ensure the RCD operation is still valid
-        if (!IsRCDOperationStillValid(uid, component, gridUid, mapGrid, tile, position, args.Direction, args.Target, args.User, popMsgs: false))
+        if (!IsRCDOperationStillValid(uid, component, gridUid, mapGrid, tile, position, args.Direction, args.PipeLayer, args.Target, args.User, popMsgs: false))
         {
             return;
         }
@@ -384,10 +394,21 @@ public sealed class RCDSystem : EntitySystem
 
     public bool IsRCDOperationStillValid(EntityUid uid, RCDComponent component, EntityUid gridUid, MapGridComponent mapGrid, TileRef tile, Vector2i position, EntityUid? target, EntityUid user, bool popMsgs = true)
     {
-        return IsRCDOperationStillValid(uid, component, gridUid, mapGrid, tile, position, component.ConstructionDirection, target, user, popMsgs);
+        return IsRCDOperationStillValid(
+            uid,
+            component,
+            gridUid,
+            mapGrid,
+            tile,
+            position,
+            component.ConstructionDirection,
+            GetPlacementLayer(component, _protoManager.Index(component.ProtoId)),
+            target,
+            user,
+            popMsgs);
     }
 
-    public bool IsRCDOperationStillValid(EntityUid uid, RCDComponent component, EntityUid gridUid, MapGridComponent mapGrid, TileRef tile, Vector2i position, Direction direction, EntityUid? target, EntityUid user, bool popMsgs = true)
+    public bool IsRCDOperationStillValid(EntityUid uid, RCDComponent component, EntityUid gridUid, MapGridComponent mapGrid, TileRef tile, Vector2i position, Direction direction, AtmosPipeLayer pipeLayer, EntityUid? target, EntityUid user, bool popMsgs = true)
     {
         var prototype = _protoManager.Index(component.ProtoId);
 
@@ -424,7 +445,7 @@ public sealed class RCDSystem : EntitySystem
         {
             case RcdMode.ConstructTile:
             case RcdMode.ConstructObject:
-                return IsConstructionLocationValid(uid, component, gridUid, mapGrid, tile, position, direction, user, popMsgs);
+                return IsConstructionLocationValid(uid, component, gridUid, mapGrid, tile, position, direction, pipeLayer, user, popMsgs);
             case RcdMode.Deconstruct:
                 return IsDeconstructionStillValid(uid, tile, target, user, popMsgs);
         }
@@ -432,9 +453,10 @@ public sealed class RCDSystem : EntitySystem
         return false;
     }
 
-    private bool IsConstructionLocationValid(EntityUid uid, RCDComponent component, EntityUid gridUid, MapGridComponent mapGrid, TileRef tile, Vector2i position, Direction direction, EntityUid user, bool popMsgs = true)
+    private bool IsConstructionLocationValid(EntityUid uid, RCDComponent component, EntityUid gridUid, MapGridComponent mapGrid, TileRef tile, Vector2i position, Direction direction, AtmosPipeLayer pipeLayer, EntityUid user, bool popMsgs = true)
     {
         var prototype = _protoManager.Index(component.ProtoId);
+        var buildProto = ResolveConstructedEntityPrototype(component, prototype, pipeLayer);
 
         // Check rule: Must build on empty tile
         if (prototype.ConstructionRules.Contains(RcdConstructionRule.MustBuildOnEmptyTile) && !tile.Tile.IsEmpty)
@@ -517,7 +539,7 @@ public sealed class RCDSystem : EntitySystem
         {
             // If the entity is the exact same prototype as what we are trying to build, then block it.
             // This is to prevent spamming objects on the same tile (e.g. lights)
-            if (prototype.Prototype != null && MetaData(ent).EntityPrototype?.ID == prototype.Prototype)
+            if (buildProto != null && MetaData(ent).EntityPrototype?.ID == buildProto)
             {
                 var isIdentical = true;
 
@@ -649,16 +671,7 @@ public sealed class RCDSystem : EntitySystem
                 break;
 
             case RcdMode.ConstructObject:
-                var buildProto = prototype.Prototype;
-
-                if (component.IsRpd &&
-                    prototype.HasLayers &&
-                    _protoManager.TryIndex<EntityPrototype>(buildProto, out var buildEntityProto) &&
-                    buildEntityProto.TryGetComponent<AtmosPipeLayersComponent>(out var pipeLayers, EntityManager.ComponentFactory) &&
-                    _pipeLayers.TryGetAlternativePrototype(pipeLayers, pipeLayer, out var altProto))
-                {
-                    buildProto = altProto;
-                }
+                var buildProto = ResolveConstructedEntityPrototype(component, prototype, pipeLayer);
 
                 var ent = Spawn(buildProto, _mapSystem.GridTileToLocal(gridUid, mapGrid, position));
 
@@ -709,10 +722,32 @@ public sealed class RCDSystem : EntitySystem
         return boundingPolygon.ComputeAABB(boundingTransform, 0).Intersects(fixture.Shape.ComputeAABB(entXform, 0));
     }
 
-    private AtmosPipeLayer GetPlacementLayer(RCDComponent component, RCDPrototype prototype)
+    private AtmosPipeLayer GetPlacementLayer(
+        RCDComponent component,
+        RCDPrototype prototype,
+        EntityCoordinates? location = null,
+        MapGridComponent? mapGrid = null,
+        Vector2i? tileIndices = null)
     {
         if (!component.IsRpd || !prototype.HasLayers)
             return AtmosPipeLayer.Primary;
+
+        // In free mode the client sends the selected side layer separately.
+        // A fast click can race that update, so detect center-clicks from the
+        // actual interaction position and force the primary pipe layer.
+        if (component.CurrentMode == RpdMode.Free &&
+            location != null &&
+            mapGrid != null &&
+            tileIndices != null)
+        {
+            var tileSize = mapGrid.TileSize;
+            var tileCenter = new Vector2(
+                tileIndices.Value.X + tileSize / 2f,
+                tileIndices.Value.Y + tileSize / 2f);
+
+            if ((location.Value.Position - tileCenter).Length() <= RpdCenterDeadzoneRadius * tileSize)
+                return AtmosPipeLayer.Primary;
+        }
 
         return component.CurrentMode switch
         {
@@ -722,6 +757,23 @@ public sealed class RCDSystem : EntitySystem
             RpdMode.Free => component.LastSelectedLayer ?? AtmosPipeLayer.Primary,
             _ => AtmosPipeLayer.Primary,
         };
+    }
+
+    private string? ResolveConstructedEntityPrototype(RCDComponent component, RCDPrototype prototype, AtmosPipeLayer pipeLayer)
+    {
+        var buildProto = prototype.Prototype;
+
+        if (buildProto == null ||
+            !component.IsRpd ||
+            !prototype.HasLayers ||
+            !_protoManager.TryIndex<EntityPrototype>(buildProto, out var buildEntityProto) ||
+            !buildEntityProto.TryGetComponent<AtmosPipeLayersComponent>(out var pipeLayers, EntityManager.ComponentFactory) ||
+            !_pipeLayers.TryGetAlternativePrototype(pipeLayers, pipeLayer, out var altProto))
+        {
+            return buildProto;
+        }
+
+        return altProto;
     }
 
     private void SwitchRpdMode(Entity<RCDComponent> ent, EntityUid? user = null)

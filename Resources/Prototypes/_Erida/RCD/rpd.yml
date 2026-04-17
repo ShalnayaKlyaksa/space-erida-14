@@ -19,6 +19,7 @@
   cost: 1
   delay: 0
   rotation: User
+  allowMultiDirection: true
   hasLayers: true
   fx: EffectRCDConstruct0
 
@@ -31,6 +32,7 @@
   cost: 1
   delay: 0
   rotation: User
+  allowMultiDirection: true
   hasLayers: true
   fx: EffectRCDConstruct0
 
@@ -43,6 +45,7 @@
   cost: 1
   delay: 0
   rotation: User
+  allowMultiDirection: true
   hasLayers: true
   fx: EffectRCDConstruct0
 

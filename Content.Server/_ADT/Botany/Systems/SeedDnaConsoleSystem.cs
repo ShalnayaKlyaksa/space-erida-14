@@ -1,16 +1,16 @@
 using Content.Server.Botany.Components;
 using Content.Server.Botany.Systems;
 using Content.Server.Botany;
-using Content.Shared._Erida.Botany.SeedDna;
-using Content.Shared._Erida.Botany.SeedDna.Components;
-using Content.Shared._Erida.Botany.SeedDna.Systems;
+using Content.Shared._ADT.Botany.SeedDna;
+using Content.Shared._ADT.Botany.SeedDna.Components;
+using Content.Shared._ADT.Botany.SeedDna.Systems;
 using Content.Shared.FixedPoint;
 using JetBrains.Annotations;
 using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using System.Linq;
 
-namespace Content.Server._Erida.Botany.Systems;
+namespace Content.Server._ADT.Botany.Systems;
 
 [UsedImplicitly]
 public sealed class SeedDnaConsoleSystem : SharedSeedDnaConsoleSystem

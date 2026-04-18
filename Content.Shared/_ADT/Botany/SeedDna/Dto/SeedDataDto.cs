@@ -3,7 +3,7 @@ using Robust.Shared.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable once CheckNamespace
-namespace Content.Shared._Erida.Botany.SeedDna;
+namespace Content.Shared._ADT.Botany.SeedDna;
 
 [Serializable, NetSerializable]
 public sealed class SeedDataDto

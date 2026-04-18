@@ -2,7 +2,7 @@ using Content.Shared.FixedPoint;
 using Robust.Shared.Serialization;
 
 // ReSharper disable once CheckNamespace
-namespace Content.Shared._Erida.Botany.SeedDna;
+namespace Content.Shared._ADT.Botany.SeedDna;
 
 [DataDefinition]
 [Serializable, NetSerializable]

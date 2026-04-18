@@ -1,7 +1,7 @@
-﻿using Robust.Shared.Serialization;
+using Robust.Shared.Serialization;
 
 // ReSharper disable once CheckNamespace
-namespace Content.Shared._Erida.Botany.SeedDna;
+namespace Content.Shared._ADT.Botany.SeedDna;
 
 [Serializable, NetSerializable]
 public sealed class WriteToTargetSeedDataMessage(
@@ -19,4 +19,3 @@ public enum TargetSeedData : byte
     Seed,
     DnaDisk,
 }
-

@@ -1,7 +1,7 @@
-﻿using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Containers.ItemSlots;
 using Robust.Shared.GameStates;
 
-namespace Content.Shared._Erida.Botany.SeedDna.Components;
+namespace Content.Shared._ADT.Botany.SeedDna.Components;
 
 [RegisterComponent, NetworkedComponent]
 public sealed partial class SeedDnaConsoleComponent : Component
@@ -15,4 +15,3 @@ public sealed partial class SeedDnaConsoleComponent : Component
     [DataField]
     public ItemSlot DnaDiskSlot = new();
 }
-

@@ -18,13 +18,13 @@ public sealed partial class LeashComponent : Component
     public TimeSpan ChokeCooldown = TimeSpan.FromSeconds(0.5);
 
     [DataField]
-    public float ChokeDistance = 4f;
+    public float ChokeDistance = 3.25f;
 
     [DataField]
     public float ResistanceThreshold = 0.05f;
 
     [DataField]
-    public float MaxTensionDistance = 4f;
+    public float MaxTensionDistance = 1.35f;
 
     [DataField]
     public float PullForce = 32f;

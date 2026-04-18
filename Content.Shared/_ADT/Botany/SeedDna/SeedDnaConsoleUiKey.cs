@@ -1,6 +1,6 @@
-﻿using Robust.Shared.Serialization;
+using Robust.Shared.Serialization;
 
-namespace Content.Shared._Erida.Botany.SeedDna;
+namespace Content.Shared._ADT.Botany.SeedDna;
 
 /// <summary>
 /// РњР°СЂРєРµСЂ, РЅРµРѕР±С…РѕРґРёРјС‹Р№ РґР»СЏ РєРѕРјРїРѕРЅРµРЅС‚Р° "ActivatableUI"
@@ -10,4 +10,3 @@ public enum SeedDnaConsoleUiKey : byte
 {
     Key,
 }
-

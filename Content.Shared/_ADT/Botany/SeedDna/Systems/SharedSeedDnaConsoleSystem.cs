@@ -1,8 +1,8 @@
-﻿using Content.Shared._Erida.Botany.SeedDna.Components;
+using Content.Shared._ADT.Botany.SeedDna.Components;
 using Content.Shared.Containers.ItemSlots;
 using JetBrains.Annotations;
 
-namespace Content.Shared._Erida.Botany.SeedDna.Systems;
+namespace Content.Shared._ADT.Botany.SeedDna.Systems;
 
 [UsedImplicitly]
 public abstract class SharedSeedDnaConsoleSystem : EntitySystem
@@ -29,4 +29,3 @@ public abstract class SharedSeedDnaConsoleSystem : EntitySystem
         _itemSlotsSystem.RemoveItemSlot(uid, component.DnaDiskSlot);
     }
 }
-

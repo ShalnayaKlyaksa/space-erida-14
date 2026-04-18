@@ -6,6 +6,7 @@
   components:
   - type: Sprite
     sprite: _Erida/Objects/Fun/ERP/leash.rsi
+    scale: 0.75,0.75
     state: icon
   - type: Item
     sprite: _Erida/Objects/Fun/ERP/leash.rsi

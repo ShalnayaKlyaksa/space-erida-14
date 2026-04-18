@@ -16,6 +16,7 @@
   - type: Sprite
     state: icon
     sprite: _Erida/Clothing/Neck/Misc/petcollar.rsi
+    scale: 0.75,0.75
   - type: Tag
     tags:
     - Recyclable

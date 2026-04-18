@@ -1,11 +1,11 @@
-using Content.Shared._ADT.Botany.SeedDna;
+using Content.Shared._Erida.Botany.SeedDna;
 using Content.Shared.Containers.ItemSlots;
-using static Content.Shared._ADT.Botany.SeedDna.Components.SeedDnaConsoleComponent;
+using static Content.Shared._Erida.Botany.SeedDna.Components.SeedDnaConsoleComponent;
 
-namespace Content.Client._ADT.Botany.UI;
+namespace Content.Client._Erida.Botany.UI;
 
 /// <summary>
-/// РљРѕРЅС‚РµР№РЅРµСЂ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С… РѕС‚ СЃРµСЂРІРµСЂР° Рє РєР»РёРµРЅС‚СЃРєРѕРјСѓ UI.
+/// SeedDnaConsole UI port from Adventure time.
 /// </summary>
 public sealed class SeedDnaConsoleBoundUserInterface(EntityUid owner, Enum uiKey) : BoundUserInterface(owner, uiKey)
 {

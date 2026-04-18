@@ -1,6 +1,6 @@
 using Robust.Shared.GameStates;
 
-namespace Content.Shared._ADT.Botany.SeedDna.Components;
+namespace Content.Shared._Erida.Botany.SeedDna.Components;
 
 [RegisterComponent, NetworkedComponent]
 public sealed partial class DnaDiskComponent : Component

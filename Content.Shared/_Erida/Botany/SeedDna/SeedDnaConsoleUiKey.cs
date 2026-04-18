@@ -1,6 +1,6 @@
 using Robust.Shared.Serialization;
 
-namespace Content.Shared._ADT.Botany.SeedDna;
+namespace Content.Shared._Erida.Botany.SeedDna;
 
 /// <summary>
 /// РњР°СЂРєРµСЂ, РЅРµРѕР±С…РѕРґРёРјС‹Р№ РґР»СЏ РєРѕРјРїРѕРЅРµРЅС‚Р° "ActivatableUI"

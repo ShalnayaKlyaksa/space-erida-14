@@ -1,7 +1,7 @@
 using Robust.Shared.Serialization;
 
 // ReSharper disable once CheckNamespace
-namespace Content.Shared._ADT.Botany.SeedDna;
+namespace Content.Shared._Erida.Botany.SeedDna;
 
 /// <summary>
 /// РљРѕРЅС‚РµР№РЅРµСЂ РґР»СЏ РїРµСЂРµРґР°С‡Рё СЃРѕСЃС‚РѕСЏРЅРёСЏ UI РјРµР¶РґСѓ РєР»РёРµРЅС‚РѕРј Рё СЃРµСЂРІРµСЂРѕРј

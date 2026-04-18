@@ -1,9 +1,9 @@
-using Content.Shared._ADT.Botany.SeedDna;
+using Content.Shared._Erida.Botany.SeedDna;
 using Content.Shared.FixedPoint;
 using Robust.Client.UserInterface.Controls;
 using System.Globalization;
 
-namespace Content.Client._ADT.Botany.UI;
+namespace Content.Client._Erida.Botany.UI;
 
 public sealed class SeedDnaConsoleWindowRow
 {

@@ -1,6 +1,6 @@
 - type: entity
   parent: BaseComputerAiAccess
-  id: EridaComputerBotanicalSeedDnaManipulator
+  id: ComputerBotanicalSeedDnaManipulator
   name: plant seed DNA manipulator
   description: A powered botany console for copying specific seed genes to and from DNA disks.
   components:
@@ -44,7 +44,7 @@
     - map: ["enum.WiresVisualLayers.MaintenancePanel"]
       state: generic_panel_open
   - type: Computer
-    board: EridaBotanicalSeedDnaManipulatorCircuitboard
+    board: BotanicalSeedDnaManipulatorCircuitboard
   - type: PointLight
     radius: 1.5
     energy: 1.6

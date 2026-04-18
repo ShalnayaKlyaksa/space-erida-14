@@ -1,6 +1,6 @@
 - type: entity
   parent: BaseItem
-  id: EridaBotanicalSeedDnaDisk
+  id: BotanicalSeedDnaDisk
   name: plant seed DNA disk
   description: Stores selected genetic traits from plant seeds.
   components:

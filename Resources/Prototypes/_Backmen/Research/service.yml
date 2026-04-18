@@ -93,7 +93,7 @@
    - HydroponicsToolClippers
    - ClothingBeltPlant
    - PlantBag
-   - EridaBotanicalSeedDnaDisk
+    - BotanicalSeedDnaDisk
   technologyPrerequisites:
   - ServiceMachines
   position: 3,8

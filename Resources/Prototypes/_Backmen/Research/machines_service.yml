@@ -10,7 +10,7 @@
   recipeUnlocks:
   - SeedExtractorMachineCircuitboard
   - HydroponicsTrayMachineCircuitboard
-    - BotanicalSeedDnaManipulatorCircuitboard
+  - BotanicalSeedDnaManipulatorCircuitboard
   - ReagentGrinderIndustrialMachineCircuitboard
   - BiogeneratorMachineCircuitboard
   technologyPrerequisites:

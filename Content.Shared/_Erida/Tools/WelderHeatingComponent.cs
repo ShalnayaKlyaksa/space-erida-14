@@ -1,8 +1,6 @@
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
 using Content.Shared.Tools;
-using JetBrains.Annotations;
-using Robust.Shared.Audio;
 
 namespace Content.Shared._Erida.WelderHeating;
 
@@ -11,20 +9,21 @@ namespace Content.Shared._Erida.WelderHeating;
 public sealed partial class WelderHeatingComponent : Component
 {
 
-    // Ой жоске нагревайка
+    /// <summary>
+    /// Defines how much heat can apply to solution once
+    /// </summary>
     [DataField]
-    public float HeatPerUse = 5000f;
+    public float HeatPerUse = 1000f;
 
-    // Чо за аппарат..?
+    /// <summary>
+    /// Threshold of heat to which welder can heat
+    /// </summary>
+    [DataField]
+    public float HeatThreshold = 10000f;
+
+    /// <summary>
+    /// Defines which tool would used to heat
+    /// </summary>
     [DataField]
     public ProtoId<ToolQualityPrototype> RequiredQuality = "Welding";
-
-
-    public SoundSpecifier HeatSound = new SoundPathSpecifier("/Audio/Effects/Chemistry/bubbles.ogg");
-    public LocId Popup = "warming-with-welder";
-
-    [DataField]
-    public float SoundCooldown = 1.5f;
-
-    public TimeSpan NextSoundAt;
 }

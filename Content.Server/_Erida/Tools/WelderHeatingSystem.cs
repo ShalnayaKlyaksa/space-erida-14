@@ -4,19 +4,15 @@ using Content.Shared._Erida.WelderHeating;
 using Content.Shared.Interaction;
 using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Tools.Components;
-using Robust.Shared.Audio.Systems;
-using Robust.Shared.Timing;
-using Robust.Shared.Audio;
+using Content.Shared.Item;
+
 
 namespace Content.Server._Erida.Tools.WelderHeating;
 
 public sealed class WelderHeatingSystem : EntitySystem
 {
-    [Dependency] private readonly SharedSolutionContainerSystem _solution = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
-    [Dependency] private readonly SharedAudioSystem _audio = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
-
     public override void Initialize()
     {
         base.Initialize();
@@ -28,30 +24,24 @@ public sealed class WelderHeatingSystem : EntitySystem
         if (TryComp<WelderComponent>(ent, out var welder) && !welder.Enabled)
             return;
 
+        if (!HasComp<ItemComponent>(args.Target))
+            return;
         if (args.Target is not { } target || !args.CanReach)
             return;
 
-        if (!TryComp<SolutionContainerManagerComponent>(target, out var manager))
+        if (!TryComp<SolutionContainerManagerComponent>(target, out var container))
             return;
-
-        var targetEnt = (target, manager);
-
-        foreach (var (name, solEnt) in _solution.EnumerateSolutions(targetEnt))
+        foreach (var (_, soln) in _solutionContainer.EnumerateSolutions((target, container)))
         {
-            _solution.AddThermalEnergy(solEnt, ent.Comp.HeatPerUse);
+            if (soln.Comp.Solution.Temperature > ent.Comp.HeatThreshold)
+                continue;
+            _solutionContainer.AddThermalEnergy(soln, ent.Comp.HeatPerUse);
         }
 
-        var msg = Loc.GetString(ent.Comp.Popup,
+        var msg = Loc.GetString("warming-with-welder",
             ("container", Name(target)),
             ("welder", Name(ent.Owner)));
 
         _popup.PopupEntity(msg, args.User, args.User);
-
-        if (_timing.CurTime >= ent.Comp.NextSoundAt)
-        {
-            _audio.PlayPvs(ent.Comp.HeatSound, target, AudioParams.Default.WithVolume(-2f));
-
-            ent.Comp.NextSoundAt = _timing.CurTime + TimeSpan.FromSeconds(ent.Comp.SoundCooldown);
-        }
     }
 }

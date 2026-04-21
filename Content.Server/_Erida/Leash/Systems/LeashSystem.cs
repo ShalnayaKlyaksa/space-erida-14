@@ -1,9 +1,13 @@
 using System.Numerics;
 using Content.Server._Erida.Leash.Components;
 using Content.Shared.Alert;
+using Content.Shared._DV.Carrying;
 using Content.Shared._Erida.Leash;
 using Content.Shared._Erida.Leash.Components;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Disposal.Components;
+using Content.Shared.Disposal.Unit;
+using Content.Shared.Disposal.Unit.Events;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands;
 using Content.Shared.Hands.EntitySystems;
@@ -11,6 +15,8 @@ using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Inventory;
 using Content.Shared.Inventory.Events;
+using Content.Shared.Item;
+using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Events;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Physics;
@@ -42,11 +48,14 @@ public sealed class LeashSystem : EntitySystem
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
 
+    private readonly HashSet<EntityUid> _allowedCollarUnequips = new();
+
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<CollarComponent, GotEquippedEvent>(OnCollarEquipped);
+        SubscribeLocalEvent<CollarComponent, BeingUnequippedAttemptEvent>(OnCollarUnequipAttempt);
         SubscribeLocalEvent<CollarComponent, GotUnequippedEvent>(OnCollarUnequipped);
         SubscribeLocalEvent<CollarComponent, EntityTerminatingEvent>(OnCollarTerminating);
         SubscribeLocalEvent<LeashComponent, AfterInteractEvent>(OnLeashAfterInteract);
@@ -57,8 +66,14 @@ public sealed class LeashSystem : EntitySystem
         SubscribeLocalEvent<LeashComponent, EntityTerminatingEvent>(OnLeashTerminating);
 
         SubscribeLocalEvent<CollarWearerComponent, MoveInputEvent>(OnWearerMoveInput);
+        SubscribeLocalEvent<CollarWearerComponent, GettingPickedUpAttemptEvent>(OnCollarWearerPickupAttempt);
         SubscribeLocalEvent<CollarWearerComponent, RemoveCollarAlertEvent>(OnRemoveCollarAlert);
         SubscribeLocalEvent<CollarWearerComponent, RemoveCollarDoAfterEvent>(OnRemoveCollarDoAfter);
+        SubscribeLocalEvent<LeashHolderComponent, MoveInputEvent>(OnHolderMoveInput);
+        SubscribeLocalEvent<LeashHolderComponent, PickupAttemptEvent>(OnLeashHolderPickupAttempt);
+        SubscribeLocalEvent<CollarWearerComponent, DoAfterAttemptEvent<CarryDoAfterEvent>>(OnCarryDoAfterAttempt);
+        SubscribeLocalEvent<LeashHolderComponent, DoAfterAttemptEvent<CarryDoAfterEvent>>(OnCarryDoAfterAttempt);
+        SubscribeLocalEvent<DisposalUnitComponent, BeforeDisposalFlushEvent>(OnBeforeDisposalFlush);
     }
 
     public override void Update(float frameTime)
@@ -81,6 +96,21 @@ public sealed class LeashSystem : EntitySystem
         var wearer = EnsureComp<CollarWearerComponent>(args.Equipee);
         wearer.Collar = uid;
         _alerts.ShowAlert(args.Equipee, component.Alert);
+    }
+
+    private void OnCollarUnequipAttempt(EntityUid uid, CollarComponent component, BeingUnequippedAttemptEvent args)
+    {
+        if (args.Slot != "neck" ||
+            args.UnEquipTarget != args.Unequipee ||
+            component.Wearer != args.UnEquipTarget ||
+            _allowedCollarUnequips.Contains(uid))
+        {
+            return;
+        }
+
+        args.Cancel();
+        args.Reason = "leash-remove-collar-blocked";
+        TryStartRemoveCollarDoAfter(args.UnEquipTarget, uid, component);
     }
 
     private void OnCollarUnequipped(EntityUid uid, CollarComponent component, GotUnequippedEvent args)
@@ -136,6 +166,9 @@ public sealed class LeashSystem : EntitySystem
     private void OnLeashEquippedHand(EntityUid uid, LeashComponent component, GotEquippedHandEvent args)
     {
         component.Holder = args.User;
+        var holder = EnsureComp<LeashHolderComponent>(args.User);
+        holder.Leashes.Add(uid);
+
         UpdateLeashVisuals(uid, component);
         TryStartLeashPull(uid, component);
     }
@@ -159,6 +192,7 @@ public sealed class LeashSystem : EntitySystem
         if (component.Holder != null)
         {
             StopLeashPull(uid, component);
+            RemoveHolderLeash(uid, component.Holder);
             component.Holder = null;
         }
 
@@ -168,17 +202,23 @@ public sealed class LeashSystem : EntitySystem
     private void OnLeashTerminating(EntityUid uid, LeashComponent component, ref EntityTerminatingEvent args)
     {
         DetachLeash(uid, component);
+        RemoveHolderLeash(uid, component.Holder);
     }
 
     private void OnWearerMoveInput(EntityUid uid, CollarWearerComponent component, ref MoveInputEvent args)
     {
         if (!args.HasDirectionalMovement ||
             !TryGetLeash(uid, component, out _, out var leash) ||
-            leash.Holder is not { Valid: true } holder ||
-            _timing.CurTime < leash.NextChokeTime)
+            leash.Holder is not { Valid: true } holder)
         {
             return;
         }
+
+        if (TryStopStretchingMovement(uid, holder, leash, args.Entity.Comp))
+            return;
+
+        if (_timing.CurTime < leash.NextChokeTime)
+            return;
 
         var wearerCoords = _transform.GetMapCoordinates(uid);
         var holderCoords = _transform.GetMapCoordinates(holder);
@@ -199,6 +239,63 @@ public sealed class LeashSystem : EntitySystem
             return;
     }
 
+    private void OnHolderMoveInput(EntityUid uid, LeashHolderComponent component, ref MoveInputEvent args)
+    {
+        foreach (var leashUid in component.Leashes)
+        {
+            if (!TryComp<LeashComponent>(leashUid, out var leash) ||
+                !TryGetLeashWearer(leash, out var wearer) ||
+                !TryStopStretchingMovement(uid, wearer, leash, args.Entity.Comp))
+            {
+                continue;
+            }
+
+            return;
+        }
+    }
+
+    private void OnCollarWearerPickupAttempt(EntityUid uid, CollarWearerComponent component, GettingPickedUpAttemptEvent args)
+    {
+        if (!HasActiveLeash(uid))
+            return;
+
+        args.Cancel();
+        if (args.ShowPopup)
+            _popup.PopupEntity(Loc.GetString("leash-cannot-pick-up"), uid, args.User, PopupType.SmallCaution);
+    }
+
+    private void OnLeashHolderPickupAttempt(EntityUid uid, LeashHolderComponent component, PickupAttemptEvent args)
+    {
+        if (!HasActiveLeash(uid))
+            return;
+
+        args.Cancel();
+        if (args.ShowPopup)
+            _popup.PopupEntity(Loc.GetString("leash-cannot-pick-up"), uid, args.User, PopupType.SmallCaution);
+    }
+
+    private void OnCarryDoAfterAttempt<TComponent>(EntityUid uid, TComponent component, DoAfterAttemptEvent<CarryDoAfterEvent> args)
+        where TComponent : Component
+    {
+        if (!HasActiveLeash(uid) && !HasActiveLeash(args.DoAfter.Args.User))
+            return;
+
+        args.Cancel();
+        _popup.PopupEntity(Loc.GetString("leash-cannot-carry"), uid, args.DoAfter.Args.User, PopupType.SmallCaution);
+    }
+
+    private void OnBeforeDisposalFlush(EntityUid uid, DisposalUnitComponent component, BeforeDisposalFlushEvent args)
+    {
+        foreach (var contained in component.Container.ContainedEntities)
+        {
+            if (!HasActiveLeash(contained))
+                continue;
+
+            args.Cancel();
+            return;
+        }
+    }
+
     private void OnRemoveCollarAlert(EntityUid uid, CollarWearerComponent component, ref RemoveCollarAlertEvent args)
     {
         if (args.Handled ||
@@ -209,18 +306,9 @@ public sealed class LeashSystem : EntitySystem
             return;
         }
 
-        var doAfter = new DoAfterArgs(EntityManager, uid, collar.BreakoutTime, new RemoveCollarDoAfterEvent(), uid, target: uid, used: collarUid)
-        {
-            BreakOnMove = true,
-            BreakOnDamage = true,
-            NeedHand = true,
-            BreakOnDropItem = false,
-        };
-
-        if (!_doAfter.TryStartDoAfter(doAfter))
+        if (!TryStartRemoveCollarDoAfter(uid, collarUid, collar))
             return;
 
-        _popup.PopupEntity(Loc.GetString("leash-remove-collar-start"), uid, uid);
         args.Handled = true;
     }
 
@@ -244,10 +332,19 @@ public sealed class LeashSystem : EntitySystem
             return;
         }
 
-        if (!_inventory.TryUnequip(uid, uid, "neck", out var removedItem, checkDoafter: false))
+        EntityUid? removedItem;
+        _allowedCollarUnequips.Add(collarUid);
+        try
         {
-            _popup.PopupEntity(Loc.GetString("leash-remove-collar-fail"), uid, uid, PopupType.SmallCaution);
-            return;
+            if (!_inventory.TryUnequip(uid, uid, "neck", out removedItem, checkDoafter: false))
+            {
+                _popup.PopupEntity(Loc.GetString("leash-remove-collar-fail"), uid, uid, PopupType.SmallCaution);
+                return;
+            }
+        }
+        finally
+        {
+            _allowedCollarUnequips.Remove(collarUid);
         }
 
         if (removedItem != null)
@@ -267,6 +364,7 @@ public sealed class LeashSystem : EntitySystem
             UpdateLeashVisuals(uid, component);
 
         StopLeashPull(uid, component);
+        RemoveHolderLeash(uid, component.Holder);
         component.Holder = null;
     }
 
@@ -360,6 +458,19 @@ public sealed class LeashSystem : EntitySystem
         }
     }
 
+    private void RemoveHolderLeash(EntityUid leashUid, EntityUid? holderUid)
+    {
+        if (holderUid is not { Valid: true } holder ||
+            !TryComp<LeashHolderComponent>(holder, out var holderComp))
+        {
+            return;
+        }
+
+        holderComp.Leashes.Remove(leashUid);
+        if (holderComp.Leashes.Count == 0)
+            RemCompDeferred<LeashHolderComponent>(holder);
+    }
+
     private bool TryResolveCollarTarget(EntityUid target, out EntityUid collarUid, out CollarComponent collar)
     {
         collarUid = default;
@@ -404,6 +515,47 @@ public sealed class LeashSystem : EntitySystem
         return true;
     }
 
+    private bool TryGetLeashWearer(LeashComponent leash, out EntityUid wearer)
+    {
+        wearer = default;
+
+        if (leash.AttachedCollar is not { Valid: true } collarUid ||
+            !TryComp<CollarComponent>(collarUid, out var collar) ||
+            collar.Wearer is not { Valid: true } collarWearer)
+        {
+            return false;
+        }
+
+        wearer = collarWearer;
+        return true;
+    }
+
+    private bool HasActiveLeash(EntityUid uid)
+    {
+        if (TryComp<CollarWearerComponent>(uid, out var wearer) &&
+            wearer.Collar is { Valid: true } collarUid &&
+            TryComp<CollarComponent>(collarUid, out var collar) &&
+            collar.AttachedLeash is { Valid: true })
+        {
+            return true;
+        }
+
+        if (!TryComp<LeashHolderComponent>(uid, out var holder))
+            return false;
+
+        foreach (var leashUid in holder.Leashes)
+        {
+            if (TryComp<LeashComponent>(leashUid, out var leash) &&
+                leash.Holder == uid &&
+                leash.AttachedCollar is { Valid: true })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void UpdateLeashVisuals(EntityUid leashUid, LeashComponent leash)
     {
         if (leash.Holder is { Valid: true } holder &&
@@ -439,6 +591,54 @@ public sealed class LeashSystem : EntitySystem
         return vector.LengthSquared() > 0f ? Vector2.Normalize(vector) : Vector2.Zero;
     }
 
+    private bool TryStartRemoveCollarDoAfter(EntityUid wearerUid, EntityUid collarUid, CollarComponent collar)
+    {
+        var doAfter = new DoAfterArgs(EntityManager, wearerUid, collar.BreakoutTime, new RemoveCollarDoAfterEvent(), wearerUid, target: wearerUid, used: collarUid)
+        {
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            NeedHand = true,
+            BreakOnDropItem = false,
+        };
+
+        if (!_doAfter.TryStartDoAfter(doAfter))
+            return false;
+
+        _popup.PopupEntity(Loc.GetString("leash-remove-collar-start"), wearerUid, wearerUid);
+        return true;
+    }
+
+    private bool TryStopStretchingMovement(EntityUid mover, EntityUid anchor, LeashComponent leash, InputMoverComponent moverComp)
+    {
+        if (!IsMovingAwayPastLimit(mover, anchor, moverComp.HeldMoveButtons, leash.MaximumDistance))
+            return false;
+
+        moverComp.CurTickWalkMovement = Vector2.Zero;
+        moverComp.CurTickSprintMovement = Vector2.Zero;
+        Dirty(mover, moverComp);
+        _physics.WakeBody(mover);
+        return true;
+    }
+
+    private bool IsMovingAwayPastLimit(EntityUid mover, EntityUid anchor, MoveButtons buttons, float maxDistance)
+    {
+        var moverCoords = _transform.GetMapCoordinates(mover);
+        var anchorCoords = _transform.GetMapCoordinates(anchor);
+
+        if (moverCoords.MapId != anchorCoords.MapId)
+            return false;
+
+        var away = moverCoords.Position - anchorCoords.Position;
+        if (away.LengthSquared() < maxDistance * maxDistance)
+            return false;
+
+        var moveVector = GetMoveVector(buttons);
+        if (moveVector.LengthSquared() <= 0f || away.LengthSquared() <= 0.001f)
+            return false;
+
+        return Vector2.Dot(Vector2.Normalize(moveVector), Vector2.Normalize(away)) > 0.2f;
+    }
+
     private void UpdateLeashConstraint(EntityUid leashUid, LeashComponent leash, float frameTime)
     {
         if (leash.Holder is not { Valid: true } holder ||
@@ -472,6 +672,17 @@ public sealed class LeashSystem : EntitySystem
 
         _physics.WakeBody(wearer);
         _physics.ApplyLinearImpulse(wearer, impulse, body: wearerBody);
+
+        if (distance >= leash.MaximumDistance &&
+            TryComp<PhysicsComponent>(holder, out var holderBody))
+        {
+            var holderImpulse = -direction * (leash.PullForce * MathF.Max(1f, (distance - leash.MaximumDistance) * 3f) * holderBody.Mass * frameTime);
+            _physics.WakeBody(holder);
+            _physics.ApplyLinearImpulse(holder, holderImpulse, body: holderBody);
+
+            if (TryComp<InputMoverComponent>(holder, out var holderMover))
+                TryStopStretchingMovement(holder, wearer, leash, holderMover);
+        }
 
         if (distance < leash.ChokeDistance || _timing.CurTime < leash.NextChokeTime)
             return;

@@ -21,6 +21,8 @@ public sealed class SeedDnaConsoleWindowRow
     private Action? _actionExtract;
     private Action? _actionReplace;
 
+    private readonly Func<object?> _getterSeedValue;
+    private readonly Func<object?> _getterDnaDiskValue;
     private readonly Func<float?>? _getSeedPotency;
     private readonly Func<float?>? _getDiskPotency;
 
@@ -34,9 +36,12 @@ public sealed class SeedDnaConsoleWindowRow
         Action<object?> setterDnaDiskValue,
         Func<bool> flagUpdateImmediately,
         Action<TargetSeedData> submit,
+        Action refreshRows,
         Func<float?>? getSeedPotency = null,
         Func<float?>? getDiskPotency = null)
     {
+        _getterSeedValue = getterSeedValue;
+        _getterDnaDiskValue = getterDnaDiskValue;
         _getSeedPotency = getSeedPotency;
         _getDiskPotency = getDiskPotency;
 
@@ -65,6 +70,7 @@ public sealed class SeedDnaConsoleWindowRow
             _dnaDiskValueLabel,
             flagUpdateImmediately,
             submit,
+            refreshRows,
             TargetSeedData.DnaDisk);
 
         _actionReplace = SetupActionButton(
@@ -76,6 +82,7 @@ public sealed class SeedDnaConsoleWindowRow
             _seedValueLabel,
             flagUpdateImmediately,
             submit,
+            refreshRows,
             TargetSeedData.Seed);
     }
 
@@ -109,6 +116,12 @@ public sealed class SeedDnaConsoleWindowRow
         _actionReplace?.Invoke();
     }
 
+    public void RefreshValues()
+    {
+        SetLabelValue(_seedValueLabel!, _getterSeedValue(), _getSeedPotency?.Invoke());
+        SetLabelValue(_dnaDiskValueLabel!, _getterDnaDiskValue(), _getDiskPotency?.Invoke());
+    }
+
     public static SeedDnaConsoleWindowRow? Create(
         string title,
         bool seedPresent,
@@ -119,6 +132,7 @@ public sealed class SeedDnaConsoleWindowRow
         Action<object?> setterDnaDiskValue,
         Func<bool> flagUpdateImmediately,
         Action<TargetSeedData> submit,
+        Action refreshRows,
         Func<float?>? getSeedPotency = null,
         Func<float?>? getDiskPotency = null)
     {
@@ -135,6 +149,7 @@ public sealed class SeedDnaConsoleWindowRow
             setterDnaDiskValue,
             flagUpdateImmediately,
             submit,
+            refreshRows,
             getSeedPotency,
             getDiskPotency);
     }
@@ -148,6 +163,7 @@ public sealed class SeedDnaConsoleWindowRow
         Label targetLabel,
         Func<bool> flagUpdateImmediately,
         Action<TargetSeedData> submit,
+        Action refreshRows,
         TargetSeedData target)
     {
         actionBtn.Disabled = getter() == null || !secondDataPresent || sourceLabel.Text == targetLabel.Text;
@@ -162,6 +178,7 @@ public sealed class SeedDnaConsoleWindowRow
 
             setter(value);
             SetLabelValue(targetLabel, value, targetPotencyFunc?.Invoke());
+            refreshRows();
             _extractButton!.Disabled = true;
             _replaceButton!.Disabled = true;
 

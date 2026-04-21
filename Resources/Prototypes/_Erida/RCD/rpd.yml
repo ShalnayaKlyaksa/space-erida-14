@@ -5,10 +5,10 @@
   mode: ConstructObject
   prototype: GasPipeFourway
   cost: 1
-  delay: 0
+  delay: 1
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeStraight
@@ -17,11 +17,11 @@
   mode: ConstructObject
   prototype: GasPipeStraight
   cost: 1
-  delay: 0
+  delay: 1
   rotation: User
   allowMultiDirection: true
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeHalf
@@ -30,11 +30,11 @@
   mode: ConstructObject
   prototype: GasPipeHalf
   cost: 1
-  delay: 0
+  delay: 1
   rotation: User
   allowMultiDirection: true
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeBend
@@ -43,11 +43,11 @@
   mode: ConstructObject
   prototype: GasPipeBend
   cost: 1
-  delay: 0
+  delay: 1
   rotation: User
   allowMultiDirection: true
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeTJunction
@@ -56,11 +56,11 @@
   mode: ConstructObject
   prototype: GasPipeTJunction
   cost: 1
-  delay: 0
+  delay: 1
   rotation: User
   hasLayers: true
   collisionMask: Impassable
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeManifold
@@ -69,9 +69,9 @@
   mode: ConstructObject
   prototype: GasPipeManifold
   cost: 2
-  delay: 0
+  delay: 1
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PressurePump
@@ -80,11 +80,11 @@
   mode: ConstructObject
   prototype: GasPressurePump
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: VolumetricPump
@@ -93,11 +93,11 @@
   mode: ConstructObject
   prototype: GasVolumePump
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: ManualValve
@@ -106,11 +106,11 @@
   mode: ConstructObject
   prototype: GasValve
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: SignalValve
@@ -119,11 +119,11 @@
   mode: ConstructObject
   prototype: SignalControlledValve
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PressureValve
@@ -132,10 +132,10 @@
   mode: ConstructObject
   prototype: PressureControlledValve
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PressureRegulator
@@ -144,11 +144,11 @@
   mode: ConstructObject
   prototype: GasPressureRegulator
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PassiveGate
@@ -157,11 +157,11 @@
   mode: ConstructObject
   prototype: GasPassiveGate
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: OutletInjector
@@ -170,11 +170,11 @@
   mode: ConstructObject
   prototype: GasOutletInjector
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: VentScrubber
@@ -183,11 +183,11 @@
   mode: ConstructObject
   prototype: GasVentScrubber
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: VentGas
@@ -196,11 +196,11 @@
   mode: ConstructObject
   prototype: GasVentPump
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: DualPortVent
@@ -209,11 +209,11 @@
   mode: ConstructObject
   prototype: GasDualPortVentPump
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: VentPassive
@@ -222,11 +222,11 @@
   mode: ConstructObject
   prototype: GasPassiveVent
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: Radiator
@@ -235,10 +235,10 @@
   mode: ConstructObject
   prototype: HeatExchanger
   cost: 3
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: MixerGas
@@ -247,10 +247,10 @@
   mode: ConstructObject
   prototype: GasMixer
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: FilterGas
@@ -259,10 +259,10 @@
   mode: ConstructObject
   prototype: GasFilter
   cost: 3
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: CanisterPort
@@ -271,11 +271,11 @@
   mode: ConstructObject
   prototype: GasPort
   cost: 3
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: PipeSensor
@@ -284,10 +284,10 @@
   mode: ConstructObject
   prototype: GasPipeSensor
   cost: 4
-  delay: 0
+  delay: 1
   rotation: User
   hasLayers: true
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: AirSensor
@@ -296,10 +296,10 @@
   mode: ConstructObject
   prototype: AirSensor
   cost: 4
-  delay: 0
+  delay: 1
   collisionMask: Impassable
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1
 
 - type: rcd
   id: AirAlarm
@@ -310,4 +310,4 @@
   cost: 8
   delay: 1
   rotation: User
-  fx: EffectRCDConstruct0
+  fx: EffectRCDConstruct1

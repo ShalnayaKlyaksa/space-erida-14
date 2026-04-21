@@ -8,3 +8,6 @@ leash-choking = The collar digs into your neck and chokes you!
 leash-remove-collar-start = You start working the collar loose.
 leash-remove-collar-fail = You fail to remove the collar.
 leash-remove-collar-success = You work the collar free.
+leash-remove-collar-blocked = The collar must be worked loose first.
+leash-cannot-pick-up = The leash is pulled taut.
+leash-cannot-carry = The leash is pulled taut.

@@ -214,7 +214,8 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
             getSeedPotency: getSeedPotency,
             getDiskPotency: getDiskPotency,
             flagUpdateImmediately: () => _flagUpdateImmediately,
-            submit: SubmitUpdateDto
+            submit: SubmitUpdateDto,
+            refreshRows: RefreshRows
         ));
     }
 
@@ -258,7 +259,8 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
             setterSeedValue: obj => setterSeedValue((float) obj!),
             setterDnaDiskValue: obj => setterDnaDiskValue((float) obj!),
             flagUpdateImmediately: () => _flagUpdateImmediately,
-            submit: SubmitUpdateDto
+            submit: SubmitUpdateDto,
+            refreshRows: RefreshRows
         ));
     }
 
@@ -273,7 +275,8 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
             setterSeedValue: obj => setterSeedValue((int) obj!),
             setterDnaDiskValue: obj => setterDnaDiskValue((int) obj!),
             flagUpdateImmediately: () => _flagUpdateImmediately,
-            submit: SubmitUpdateDto
+            submit: SubmitUpdateDto,
+            refreshRows: RefreshRows
         ));
     }
 
@@ -288,7 +291,8 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
             setterSeedValue: obj => setterSeedValue((bool) obj!),
             setterDnaDiskValue: obj => setterDnaDiskValue((bool) obj!),
             flagUpdateImmediately: () => _flagUpdateImmediately,
-            submit: SubmitUpdateDto
+            submit: SubmitUpdateDto,
+            refreshRows: RefreshRows
         ));
     }
 
@@ -303,7 +307,8 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
             setterSeedValue: obj => setterSeedValue((SharedHarvestTypeDto) obj!),
             setterDnaDiskValue: obj => setterDnaDiskValue((SharedHarvestTypeDto) obj!),
             flagUpdateImmediately: () => _flagUpdateImmediately,
-            submit: SubmitUpdateDto
+            submit: SubmitUpdateDto,
+            refreshRows: RefreshRows
         ));
     }
 
@@ -322,6 +327,14 @@ public sealed partial class SeedDnaConsoleWindow : DefaultWindow
     private void SubmitUpdateDto(TargetSeedData target)
     {
         _owner.SubmitData(target, target == TargetSeedData.Seed ? _seedDataDto! : _dnaDiskDataDto!);
+    }
+
+    private void RefreshRows()
+    {
+        foreach (var row in _allRows)
+        {
+            row.RefreshValues();
+        }
     }
 
     private void AppendRow(SeedDnaConsoleWindowRow? row)

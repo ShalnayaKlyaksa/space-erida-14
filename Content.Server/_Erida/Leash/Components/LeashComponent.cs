@@ -27,6 +27,9 @@ public sealed partial class LeashComponent : Component
     public float MaxTensionDistance = 1.35f;
 
     [DataField]
+    public float MaximumDistance = 4f;
+
+    [DataField]
     public float PullForce = 32f;
 
     public EntityUid? AttachedCollar;

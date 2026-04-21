@@ -73,9 +73,11 @@ public sealed class SeedDnaConsoleSystem : SharedSeedDnaConsoleSystem
     private void RewriteSeedData(EntityUid seed, SeedDataDto seedDataDto)
     {
         var seedComponent = Comp<SeedComponent>(seed);
-        var originalSeedData = seedComponent.Seed;
 
-        var seedData = originalSeedData?.Clone() ?? new SeedData();
+        if (!_botany.TryGetSeed(seedComponent, out var originalSeedData))
+            return;
+
+        var seedData = originalSeedData.Clone();
         seedComponent.Seed = seedData;
 
         if (seedDataDto.ConsumeGasses != null) seedData.ConsumeGasses = new(seedDataDto.ConsumeGasses);

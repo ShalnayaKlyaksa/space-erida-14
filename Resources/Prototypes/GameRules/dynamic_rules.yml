@@ -3,9 +3,7 @@
   id: DynamicRule
   components:
   - type: GameRule
-    # Erida Extended reuses this rule as a nested difficulty option,
-    # so it needs to stay startable on low population too.
-    minPlayers: 1
+    minPlayers: 5 # <5 is greenshift hours, buddy.
   - type: DynamicRule
     startingBudgetMin: 200
     startingBudgetMax: 350

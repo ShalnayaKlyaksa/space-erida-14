@@ -1,25 +1,14 @@
 - type: gamePreset
-  id: Calm
-  alias:
-    - calm
-    - quiet
-  name: calm-title
-  showInVote: true
-  description: calm-description
-  rules:
-    - EridaCalmStationEventScheduler
-    - BasicRoundstartVariation
-
-- type: gamePreset
   id: Survival
   alias:
     - survival
   name: survival-title
-  showInVote: true
+  showInVote: false # secret
   description: survival-description
   rules:
-    - EridaSurvivalDynamicRule
-    - EridaSurvivalStationEventScheduler
+    - MeteorSwarmScheduler
+    - RampingStationEventScheduler
+    - SpaceTrafficControlEventScheduler
     - BasicRoundstartVariation
 
 - type: gamePreset
@@ -90,7 +79,9 @@
   showInVote: true
   description: extended-description
   rules:
-  - EridaExtendedScenario
+  - BasicCalmStationEventScheduler # Erida edit
+  - MeteorSwarmScheduler
+  - SpaceTrafficControlEventScheduler
   - BasicRoundstartVariation
 
 - type: gamePreset
@@ -127,24 +118,10 @@
     - secret
     - sekrit
   name: secret-title
-  showInVote: false
+  showInVote: true
   description: secret-description
   rules:
     - Secret
-
-- type: gamePreset
-  id: Apocalypse
-  alias:
-    - apocalypse
-    - apoc
-  name: apocalypse-title
-  showInVote: false
-  description: apocalypse-description
-  rules:
-    - EridaApocalypseDynamicRule
-    - EridaApocalypseStationEventScheduler
-    - EridaApocalypseWarningRule
-    - BasicRoundstartVariation
 
 - type: gamePreset
   id: Sandbox

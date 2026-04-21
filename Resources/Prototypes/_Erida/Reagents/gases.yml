@@ -112,9 +112,9 @@
           min: 0.5
         ignoreResistances: true
         damage:
-          Brute: -0.7
-          Burn: -0.7
-          Toxin: -1.25
+          Brute: -0.25
+          Burn: -0.25
+          Toxin: -0.6
       - !type:ModifyBleed
         amount: -0.15
 

@@ -378,3 +378,47 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/325
   avatar_url: https://avatars.githubusercontent.com/u/271650867?v=4
   title: Port edge connection system from orion
+- author: no_mad
+  changes:
+    - type: Add
+      message: Добавлены новые руины и мобы
+    - type: Add
+      message: Добавлены вещи для утилизаторов и новые ветки прокачки снаряжения
+  id: 33
+  time: '2026-04-20T16:03:06.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/322
+  avatar_url: https://avatars.githubusercontent.com/u/110369449?v=4
+  title: '[Feature] Black Mesa Incident'
+- author: no_mad
+  changes:
+    - type: Fix
+      message: Исправлена создание исследовательского костюма из пластин голиафов
+  id: 34
+  time: '2026-04-21T01:41:20.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/332
+  avatar_url: https://avatars.githubusercontent.com/u/110369449?v=4
+  title: '[Fix] Конструк Граф'
+- author: Shalnaya_Klyaksa
+  changes:
+    - type: Add
+      message: >-
+        Добавлены ошейники и поводки, РСУ атмосферного техника, манипулятор днк
+        растений
+    - type: Add
+      message: ЦИИ получил возможность открывать и закрывать зарядку боргов.
+    - type: Fix
+      message: Исправлены проблемы с доступами у боргов и кровотёком.
+  id: 35
+  time: '2026-04-21T04:21:54.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/329
+  avatar_url: https://avatars.githubusercontent.com/u/110557981?v=4
+  title: Adding and fixing things
+- author: Sidzaru
+  changes:
+    - type: Fix
+      message: См снова фоник
+  id: 36
+  time: '2026-04-21T04:23:50.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/333
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: '[Fix] SuperMatter'

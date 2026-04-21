@@ -208,6 +208,7 @@ public sealed class AlignAtmosPipeLayers : SnapgridCenter
         base.AlignPlacementMode(mouseScreen);
     }
 
+    // Erida start
     private AtmosPipeLayer ResolveCurrentLayer(Angle gridRotation)
     {
         if (_playerManager.LocalSession?.AttachedEntity is not { } player ||
@@ -274,4 +275,5 @@ public sealed class AlignAtmosPipeLayers : SnapgridCenter
 
         _entityNetwork.SendSystemNetworkMessage(new RPDSelectedLayerEvent(netEntity.Value, (byte) layer));
     }
+    // Erida end
 }

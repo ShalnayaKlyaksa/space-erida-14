@@ -35,6 +35,7 @@ public sealed partial class RCDComponent : Component
     [DataField, AutoNetworkedField]
     public ProtoId<RCDPrototype> ProtoId { get; set; } = "Invalid";
 
+    // Erida start
     /// <summary>
     /// Indicates whether this device is configured as an atmospherics RPD.
     /// </summary>
@@ -58,6 +59,7 @@ public sealed partial class RCDComponent : Component
     /// </summary>
     [DataField]
     public SoundSpecifier SoundSwitchMode { get; set; } = new SoundPathSpecifier("/Audio/Machines/quickbeep.ogg");
+    // Erida end
 
     /// <summary>
     /// The direction constructed entities will face upon spawning
@@ -85,6 +87,7 @@ public sealed partial class RCDComponent : Component
     public Transform ConstructionTransform { get; private set; }
 }
 
+// Erida edit
 [Serializable, NetSerializable]
 public enum RpdMode : byte
 {

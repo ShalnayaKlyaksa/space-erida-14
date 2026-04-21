@@ -652,13 +652,13 @@ public abstract partial class SharedStationAiSystem : EntitySystem
     }
 }
 
+// Erida start
 public abstract partial class SharedStationAiSystem
 {
-    private void InitializeBorgCharger()
+    private void InitializeBorgCharger() //Allow sAI open charger
     {
         SubscribeLocalEvent<EntityStorageComponent, StationAiToggleBorgChargerEvent>(OnToggleBorgCharger);
     }
-
     private void OnToggleBorgCharger(Entity<EntityStorageComponent> ent, ref StationAiToggleBorgChargerEvent args)
     {
         if (!PowerReceiver.IsPowered(ent.Owner))
@@ -666,13 +666,10 @@ public abstract partial class SharedStationAiSystem
             ShowDeviceNotRespondingPopup(args.User);
             return;
         }
-
-        if (ent.Comp.Open)
-            _entityStorage.TryCloseStorage(ent.Owner, args.User);
-        else
-            _entityStorage.OpenStorage(ent.Owner, ent.Comp);
+        _entityStorage.ToggleOpen(user: args.User, ent.Owner, ent.Comp);
     }
 }
+// Erida end
 
 public sealed partial class JumpToCoreEvent : InstantActionEvent
 {

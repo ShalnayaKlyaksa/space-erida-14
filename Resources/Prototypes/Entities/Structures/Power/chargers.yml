@@ -312,7 +312,13 @@
     whitelist:
       components:
       - BorgChassis
+    # Erida start
   - type: StationAiWhitelist
+  - type: UserInterface
+    interfaces:
+      enum.AiUi.Key:
+        type: StationAiBoundUserInterface
+    # Erida end
   - type: ContainerContainer
     containers:
       entity_storage: !type:Container

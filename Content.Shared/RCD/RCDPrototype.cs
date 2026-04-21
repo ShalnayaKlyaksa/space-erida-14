@@ -44,6 +44,7 @@ public sealed partial class RCDPrototype : IPrototype
     [DataField, ViewVariables(VVAccess.ReadOnly)]
     public string? Prototype { get; private set; }
 
+    // Erida edit
     /// <summary>
     /// Whether this build option should use atmos pipe layer placement logic.
     /// </summary>

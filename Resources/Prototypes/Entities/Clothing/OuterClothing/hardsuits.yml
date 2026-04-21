@@ -227,9 +227,9 @@
   description: A special suit that protects against hazardous, low pressure environments. Has an additional layer of armor.
   components:
   - type: Sprite
-    sprite: Clothing/OuterClothing/Hardsuits/security.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security.rsi # ADT Hardsuits Port
   - type: Clothing
-    sprite: Clothing/OuterClothing/Hardsuits/security.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security.rsi # ADT Hardsuits Port
   - type: PressureProtection
     highPressureMultiplier: 0.5
     lowPressureMultiplier: 1000
@@ -262,9 +262,9 @@
   description: Special hardsuit of the guardian angel of the brig. It is the medical version of the security hardsuit.
   components:
   - type: Sprite
-    sprite: Clothing/OuterClothing/Hardsuits/brigmedic.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/brigmedic-praz.rsi # ADT Hardsuits Port
   - type: Clothing
-    sprite: Clothing/OuterClothing/Hardsuits/brigmedic.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/brigmedic-praz.rsi # ADT Hardsuits Port
   - type: PressureProtection
     highPressureMultiplier: 0.3
     lowPressureMultiplier: 1000
@@ -289,9 +289,9 @@
   description: A specialized riot suit geared to combat low pressure environments.
   components:
   - type: Sprite
-    sprite: Clothing/OuterClothing/Hardsuits/security-warden.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security-warden.rsi # ADT Hardsuits Port
   - type: Clothing
-    sprite: Clothing/OuterClothing/Hardsuits/security-warden.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security-warden.rsi # ADT Hardsuits Port
   - type: PressureProtection
     highPressureMultiplier: 0.5
     lowPressureMultiplier: 1000
@@ -470,9 +470,9 @@
   description: A special suit that protects against hazardous, low pressure environments. Has an additional layer of armor.
   components:
   - type: Sprite
-    sprite: Clothing/OuterClothing/Hardsuits/security-red.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security-red.rsi # ADT Hardsuits Port
   - type: Clothing
-    sprite: Clothing/OuterClothing/Hardsuits/security-red.rsi
+    sprite: _ADT/Clothing/OuterClothing/Hardsuits/security-red.rsi # ADT Hardsuits Port
   - type: PressureProtection
     highPressureMultiplier: 0.45
     lowPressureMultiplier: 1000

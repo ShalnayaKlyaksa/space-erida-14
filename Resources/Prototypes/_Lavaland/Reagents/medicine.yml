@@ -52,8 +52,8 @@
       effects:
       - !type:EvenHealthChange
         damage:
-          Brute: -2
-          Burn: -3
+          Brute: -0.7
+          Burn: -1
 
 - type: reagent
   id: SerakaExtract
@@ -111,8 +111,8 @@
           worksOnLavaland: true
       - !type:EvenHealthChange
         damage:
-          Burn: -5
-          Brute: -3
+          Burn: -2
+          Brute: -1
         conditions:
         - !type:PressureThreshold
           min: 1
@@ -136,3 +136,43 @@
         emote: Scream
         probability: 0.05
         #It's balanced I swear!
+
+- type: reagent
+  id: TranexamicAcidPlus
+  name: reagent-name-tranexamic-acid-plus
+  group: Medicine
+  desc: reagent-desc-tranexamic-acid-plus
+  physicalDesc: reagent-physical-desc-viscous
+  flavor: medicine
+  color: "#ba7d7d"
+  metabolisms:
+    Bloodstream:
+      effects:
+      - !type:ModifyBleed
+        amount: -1.5
+      - !type:EvenHealthChange
+        conditions:
+        - !type:MobStateCondition
+          mobstate: Critical
+        damage:
+          Brute: -1.5
+          Burn: -1.5
+      - !type:HealthChange
+        damage:
+          types:
+            Asphyxiation: -3
+            Poison: -0.5
+            Bloodloss: -2
+            Radiation: -1
+      - !type:EvenHealthChange
+        damage:
+          Brute: -0.1
+          Burn: -0.1
+      - !type:GenericStatusEffect
+        key: Stun
+        time: 0.75
+        type: Remove
+      - !type:GenericStatusEffect
+        key: KnockedDown
+        time: 0.75
+        type: Remove

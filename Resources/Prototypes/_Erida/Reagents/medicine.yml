@@ -21,9 +21,9 @@
           - !type:TemperatureCondition
             min: 370.0
           damage:
-            Airloss: -6
-            Brute: -7.5
-            Burn: -22
+            Airloss: -3
+            Brute: -2.5
+            Burn: -7.3
 
 - type: reagent
   id: SyntheticBlood

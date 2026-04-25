@@ -495,3 +495,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/341
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: train
+- author: Sidzaru
+  changes:
+    - type: Fix
+      message: Шэдоукины больше не получают урон от удушья
+  id: 44
+  time: '2026-04-25T11:48:12.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/342
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: Shadowkins are no longer breathing

@@ -2,7 +2,7 @@ using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
 using Content.Shared.Tools;
 
-namespace Content.Shared._Erida.WelderHeating;
+namespace Content.Shared._Erida.Tools.WelderHeating;
 
 
 [RegisterComponent, NetworkedComponent]
@@ -20,6 +20,12 @@ public sealed partial class WelderHeatingComponent : Component
     /// </summary>
     [DataField]
     public float HeatThreshold = 10000f;
+
+    /// <summary>
+    /// How long it takes to heat container
+    /// </summary>
+    [DataField]
+    public float HeatDuration = 1f;
 
     /// <summary>
     /// Defines which tool would used to heat

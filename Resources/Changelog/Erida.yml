@@ -504,3 +504,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/342
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: Shadowkins are no longer breathing
+- author: Sidzaru
+  changes:
+    - type: Tweak
+      message: Транзит более не основная цель станции
+  id: 45
+  time: '2026-04-25T11:48:33.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/343
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: StationGoal changes

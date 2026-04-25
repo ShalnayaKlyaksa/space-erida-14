@@ -25,7 +25,7 @@ public sealed partial class WelderHeatingComponent : Component
     /// How long it takes to heat container
     /// </summary>
     [DataField]
-    public float HeatDuration = 1f;
+    public float HeatDuration = 3f;
 
     /// <summary>
     /// Defines which tool would used to heat

@@ -8,6 +8,13 @@
     - 'Resources/Maps/**/*.yml'
     - 'Resources/Prototypes/Maps/**/*.yml'
 
+"Changes: Prototypes":
+- changed-files:
+  - any-glob-to-any-file:
+      - 'Resources/Prototypes/**/*.yml'
+  - ignore:
+      - 'Resources/Prototypes/Maps/**/*.yml'
+
 "Changes: UI":
 - changed-files:
   - any-glob-to-any-file: '**/*.xaml*'

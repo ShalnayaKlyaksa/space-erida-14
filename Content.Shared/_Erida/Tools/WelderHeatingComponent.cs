@@ -26,10 +26,4 @@ public sealed partial class WelderHeatingComponent : Component
     /// </summary>
     [DataField]
     public float HeatDuration = 3f;
-
-    /// <summary>
-    /// Defines which tool would used to heat
-    /// </summary>
-    [DataField]
-    public ProtoId<ToolQualityPrototype> RequiredQuality = "Welding";
 }

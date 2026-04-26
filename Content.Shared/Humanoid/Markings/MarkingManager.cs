@@ -147,7 +147,8 @@ public sealed class MarkingManager
                     continue;
                 }
 
-                if (marking.Sprites.Count != markings[i].MarkingColors.Count)
+                if (marking.Sprites.Count != markings[i].MarkingColors.Count ||
+                    marking.Sprites.Count != markings[i].MarkingGradients.Count)
                 {
                     markings[i] = new Marking(marking.ID, marking.Sprites.Count);
                 }

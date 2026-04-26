@@ -47,6 +47,11 @@
   kind: source
   path: "/Textures/Shaders/rainbow.swsl"
 
+- type: shader
+  id: MarkingGradient
+  kind: source
+  path: "/Textures/Shaders/marking_gradient.swsl"
+
 # sin city effect: everything is greyscale, except red
 - type: shader
   id: Noir

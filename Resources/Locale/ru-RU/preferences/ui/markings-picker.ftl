@@ -58,6 +58,17 @@ markings-limits = { $required ->
 }
 
 markings-reorder = Изменить порядок черт
+markings-gradient = Градиент
+markings-gradient-color = Цвет перехода
+markings-gradient-angle = Направление
+markings-gradient-offset = Смещение
+markings-gradient-softness = Мягкость
+markings-gradient-None = Нет
+markings-gradient-Vertical = Вертикальный
+markings-gradient-Horizontal = Горизонтальный
+markings-gradient-Diagonal = Диагональный
+markings-gradient-ReverseDiagonal = Обратная диагональ
+markings-gradient-Radial = Радиальный
 
 humanoid-marking-modifier-respect-limits = Соблюдать ограничения
 humanoid-marking-modifier-respect-group-sex = Учитывать ограничения по группе и полу

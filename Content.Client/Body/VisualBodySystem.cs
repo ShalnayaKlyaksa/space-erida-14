@@ -6,6 +6,7 @@ using Content.Shared.Humanoid;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Shared.Configuration;
+using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 using System.Numerics;
@@ -15,11 +16,16 @@ namespace Content.Client.Body;
 
 public sealed class VisualBodySystem : SharedVisualBodySystem
 {
+    private static readonly ProtoId<ShaderPrototype> MarkingGradientShader = "MarkingGradient";
+
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly MarkingManager _marking = default!;
     [Dependency] private readonly SpriteSystem _sprite = default!;
     [Dependency] private readonly IEntityManager _entityManager = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
+
+    private readonly Dictionary<EntityUid, Direction> _lastGradientDirections = new();
 
     public override void Initialize()
     {
@@ -37,6 +43,28 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
         Subs.CVar(_cfg, CCVars.AccessibilityClientCensorNudity, OnCensorshipChanged, true);
         Subs.CVar(_cfg, CCVars.AccessibilityServerCensorNudity, OnCensorshipChanged, true);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var query = EntityQueryEnumerator<OrganComponent, VisualOrganMarkingsComponent>();
+        while (query.MoveNext(out var uid, out var organComp, out var markingsComp))
+        {
+            if (organComp.Body is not { } body)
+                continue;
+
+            if (!HasGradients(markingsComp.AppliedMarkings))
+                continue;
+
+            var direction = GetGradientDirection(body);
+            if (_lastGradientDirections.TryGetValue(uid, out var lastDirection) && lastDirection == direction)
+                continue;
+
+            _lastGradientDirections[uid] = direction;
+            RefreshMarkingGradients((uid, markingsComp), body);
+        }
     }
 
     private void OnCensorshipChanged(bool value)
@@ -191,24 +219,119 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
                 var layerId = $"{proto.ID}-{rsi.RsiState}";
 
-                if (!_sprite.LayerMapTryGet(target, layerId, out _, false))
+                if (!_sprite.LayerMapTryGet(target, layerId, out var layerIndex, false))
                 {
-                    var layer = _sprite.AddLayer(target, sprite, index + i + 1);
-                    _sprite.LayerMapSet(target, layerId, layer);
+                    layerIndex = _sprite.AddLayer(target, sprite, index + i + 1);
+                    _sprite.LayerMapSet(target, layerId, layerIndex);
                     _sprite.LayerSetSprite(target, layerId, rsi);
                 }
 
                 ScaleProfile(target); // Erida edit
 
-                if (marking.MarkingColors is not null && i < marking.MarkingColors.Count)
-                    _sprite.LayerSetColor(target, layerId, marking.MarkingColors[i]);
-                else
-                    _sprite.LayerSetColor(target, layerId, Color.White);
+                var color = marking.MarkingColors is not null && i < marking.MarkingColors.Count
+                    ? marking.MarkingColors[i]
+                    : Color.White;
+                var gradient = marking.MarkingGradients is not null && i < marking.MarkingGradients.Count
+                    ? marking.MarkingGradients[i]
+                    : MarkingGradient.None;
+
+                ApplyMarkingColor(target, layerIndex, layerId, color, gradient);
             }
 
             applied.Add(marking);
         }
         ent.Comp.AppliedMarkings = applied;
+        _lastGradientDirections[ent.Owner] = GetGradientDirection(target);
+    }
+
+    private void RefreshMarkingGradients(Entity<VisualOrganMarkingsComponent> ent, EntityUid target)
+    {
+        foreach (var marking in ent.Comp.AppliedMarkings)
+        {
+            if (!HasGradient(marking))
+                continue;
+
+            if (!_marking.TryGetMarking(marking, out var proto))
+                continue;
+
+            for (var i = 0; i < proto.Sprites.Count; i++)
+            {
+                var sprite = proto.Sprites[i];
+                if (sprite is not SpriteSpecifier.Rsi rsi)
+                    continue;
+
+                var gradient = marking.MarkingGradients is not null && i < marking.MarkingGradients.Count
+                    ? marking.MarkingGradients[i]
+                    : MarkingGradient.None;
+
+                if (gradient.Type == MarkingGradientType.None)
+                    continue;
+
+                var layerId = $"{proto.ID}-{rsi.RsiState}";
+                if (!_sprite.LayerMapTryGet(target, layerId, out var layerIndex, false))
+                    continue;
+
+                var color = marking.MarkingColors is not null && i < marking.MarkingColors.Count
+                    ? marking.MarkingColors[i]
+                    : Color.White;
+
+                ApplyMarkingColor(target, layerIndex, layerId, color, gradient);
+            }
+        }
+    }
+
+    private void ApplyMarkingColor(EntityUid target, int layerIndex, string layerId, Color color, MarkingGradient gradient)
+    {
+        if (!TryComp<SpriteComponent>(target, out var sprite))
+        {
+            _sprite.LayerSetColor(target, layerId, color);
+            return;
+        }
+
+        if (gradient.Type == MarkingGradientType.None)
+        {
+            sprite.LayerSetShader(layerIndex, null, null);
+            _sprite.LayerSetColor(target, layerId, color);
+            return;
+        }
+
+        var shader = _prototype.Index(MarkingGradientShader).InstanceUnique();
+        shader.SetParameter("startColor", ToVector4(color));
+        shader.SetParameter("endColor", ToVector4(gradient.Color));
+        shader.SetParameter("gradientType", (float) gradient.Type);
+        shader.SetParameter("gradientAngle", GetFacingGradientAngle(target, gradient.Angle));
+        shader.SetParameter("gradientOffset", gradient.Offset);
+        shader.SetParameter("gradientSoftness", gradient.Softness);
+        sprite.LayerSetShader(layerIndex, shader, MarkingGradientShader.Id);
+        _sprite.LayerSetColor(target, layerId, Color.White);
+    }
+
+    private float GetFacingGradientAngle(EntityUid target, float angle)
+    {
+        return angle + (float) GetGradientDirection(target).ToAngle().Degrees;
+    }
+
+    private Direction GetGradientDirection(EntityUid target)
+    {
+        if (TryComp<SpriteComponent>(target, out var sprite) && sprite.EnableDirectionOverride)
+            return sprite.DirectionOverride;
+
+        return _transform.GetWorldRotation(Transform(target)).GetDir();
+    }
+
+    private static bool HasGradients(IEnumerable<Marking> markings)
+    {
+        return markings.Any(HasGradient);
+    }
+
+    private static bool HasGradient(Marking marking)
+    {
+        return marking.MarkingGradients.Any(gradient => gradient.Type != MarkingGradientType.None);
+    }
+
+    private static Vector4 ToVector4(Color color)
+    {
+        return new Vector4(color.R, color.G, color.B, color.A);
     }
 
     // Erida start

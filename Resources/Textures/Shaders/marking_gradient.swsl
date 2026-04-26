@@ -1,0 +1,47 @@
+uniform highp vec4 startColor;
+uniform highp vec4 endColor;
+uniform highp float gradientType;
+uniform highp float gradientAngle;
+uniform highp float gradientOffset;
+uniform highp float gradientSoftness;
+
+varying highp vec2 localUV;
+const highp float gradientSteps = 9.0;
+const highp float pixelCells = 28.0;
+const highp float ditherStrength = 0.12;
+
+highp float cellNoise(highp vec2 cell) {
+    return fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void vertex() {
+    localUV = tCoord2;
+}
+
+void fragment() {
+    highp vec4 tex = zTexture(UV);
+    highp float t = 0.0;
+    highp float softness = max(gradientSoftness, 0.001);
+
+    highp vec2 pixelUV = (floor(localUV * pixelCells) + 0.5) / pixelCells;
+    highp vec2 cell = floor(localUV * pixelCells);
+
+    if (gradientType < 4.5) {
+        highp float radians = gradientAngle * 0.017453292519943295;
+        highp vec2 direction = normalize(vec2(cos(radians), -sin(radians)));
+        highp float position = dot(pixelUV - vec2(0.5, 0.5), direction) + 0.5 + gradientOffset;
+        t = smoothstep(0.5 - softness * 0.5, 0.5 + softness * 0.5, position);
+    } else {
+        highp float position = 1.0 - clamp(distance(pixelUV, vec2(0.5 + gradientOffset * 0.5, 0.5)) * 2.0, 0.0, 1.0);
+        t = smoothstep(0.5 - softness * 0.5, 0.5 + softness * 0.5, position);
+    }
+
+    highp float noise = cellNoise(cell) - 0.5;
+    highp float checker = mod(cell.x + cell.y, 2.0) - 0.5;
+    t = clamp(t + noise * ditherStrength + checker * ditherStrength * 0.35, 0.0, 1.0);
+    t = floor(t * gradientSteps + 0.5) / gradientSteps;
+
+    highp vec4 gradient = mix(startColor, endColor, t);
+    highp float shade = max(max(tex.r, tex.g), tex.b);
+    COLOR = vec4(gradient.rgb * shade, tex.a * gradient.a);
+}

@@ -19,6 +19,17 @@ markings-limits = { $required ->
     }
 }
 markings-reorder = Reorder markings
+markings-gradient = Gradient
+markings-gradient-color = Fade color
+markings-gradient-angle = Direction
+markings-gradient-offset = Offset
+markings-gradient-softness = Softness
+markings-gradient-None = None
+markings-gradient-Vertical = Vertical
+markings-gradient-Horizontal = Horizontal
+markings-gradient-Diagonal = Diagonal
+markings-gradient-ReverseDiagonal = Reverse diagonal
+markings-gradient-Radial = Radial
 
 humanoid-marking-modifier-respect-limits = Respect limits
 humanoid-marking-modifier-respect-group-sex = Respect group & sex restrictions

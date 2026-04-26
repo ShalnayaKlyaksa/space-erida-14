@@ -28,6 +28,24 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
     private bool _interactive;
 
     private List<ColorSelectorSliders>? _colorSliders;
+    private List<OptionButton>? _gradientTypeButtons;
+    private List<ColorSelectorSliders>? _gradientColorSliders;
+    private List<Slider>? _gradientAngleSliders;
+    private List<Slider>? _gradientOffsetSliders;
+    private List<Slider>? _gradientSoftnessSliders;
+    private List<BoxContainer>? _gradientColorContainers;
+    private List<BoxContainer>? _gradientSettingsContainers;
+    private bool _updatingControls;
+
+    private static readonly MarkingGradientType[] GradientTypes =
+    [
+        MarkingGradientType.None,
+        MarkingGradientType.Vertical,
+        MarkingGradientType.Horizontal,
+        MarkingGradientType.Diagonal,
+        MarkingGradientType.ReverseDiagonal,
+        MarkingGradientType.Radial,
+    ];
 
     public event Action<GUIBoundKeyEventArgs, LayerMarkingItem>? Pressed;
     public event Action<GUIBoundKeyEventArgs, LayerMarkingItem>? Unpressed;
@@ -106,10 +124,13 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
         if (_markingsModel.GetMarking(_organ, _layer, _markingPrototype.ID) is { } marking &&
             _colorSliders is { } sliders)
         {
+            _updatingControls = true;
             for (var i = 0; i < _markingPrototype.Sprites.Count; i++)
             {
                 sliders[i].Color = marking.MarkingColors[i];
+                UpdateGradientControls(marking, i);
             }
+            _updatingControls = false;
         }
     }
 
@@ -148,6 +169,13 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
             return;
 
         _colorSliders = new();
+        _gradientTypeButtons = new();
+        _gradientColorSliders = new();
+        _gradientAngleSliders = new();
+        _gradientOffsetSliders = new();
+        _gradientSoftnessSliders = new();
+        _gradientColorContainers = new();
+        _gradientSettingsContainers = new();
 
         for (var i = 0; i < _markingPrototype.Sprites.Count; i++)
         {
@@ -179,9 +207,139 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
             var colorIndex = i;
             selector.OnColorChanged += _ =>
             {
+                if (_updatingControls)
+                    return;
+
                 _markingsModel.TrySetMarkingColor(_organ, _layer, _markingPrototype.ID, colorIndex, selector.Color);
             };
+
+            var gradientTypeButton = new OptionButton { HorizontalExpand = true };
+            foreach (var type in GradientTypes)
+            {
+                gradientTypeButton.AddItem(Loc.GetString($"markings-gradient-{type}"), (int) type);
+            }
+
+            var gradientColorSelector = new ColorSelectorSliders { SelectorType = ColorSelectorSliders.ColorSelectorType.Hsv };
+            var gradientColorContainer = new BoxContainer
+            {
+                Orientation = LayoutOrientation.Vertical,
+                HorizontalExpand = true,
+            };
+            var settingsContainer = new BoxContainer
+            {
+                Orientation = LayoutOrientation.Vertical,
+                HorizontalExpand = true,
+            };
+
+            gradientColorContainer.AddChild(new Label { Text = Loc.GetString("markings-gradient-color") });
+            gradientColorContainer.AddChild(gradientColorSelector);
+            var angleSlider = AddGradientSlider(settingsContainer, Loc.GetString("markings-gradient-angle"), 0f, 360f, 90f, "F0");
+            var offsetSlider = AddGradientSlider(settingsContainer, Loc.GetString("markings-gradient-offset"), -1f, 1f, 0f, "F2");
+            var softnessSlider = AddGradientSlider(settingsContainer, Loc.GetString("markings-gradient-softness"), 0.02f, 1f, 1f, "F2");
+
+            container.AddChild(new Label { Text = Loc.GetString("markings-gradient") });
+            container.AddChild(gradientTypeButton);
+            container.AddChild(gradientColorContainer);
+            container.AddChild(settingsContainer);
+
+            _gradientTypeButtons.Add(gradientTypeButton);
+            _gradientColorSliders.Add(gradientColorSelector);
+            _gradientAngleSliders.Add(angleSlider);
+            _gradientOffsetSliders.Add(offsetSlider);
+            _gradientSoftnessSliders.Add(softnessSlider);
+            _gradientColorContainers.Add(gradientColorContainer);
+            _gradientSettingsContainers.Add(settingsContainer);
+
+            UpdateGradientControls(marking, colorIndex);
+
+            gradientTypeButton.OnItemSelected += args =>
+            {
+                gradientTypeButton.SelectId(args.Id);
+                var type = (MarkingGradientType) args.Id;
+                angleSlider.Value = MarkingGradient.DefaultAngle(type);
+                SetGradient(colorIndex);
+            };
+            gradientColorSelector.OnColorChanged += _ => SetGradient(colorIndex);
+            angleSlider.OnValueChanged += _ => SetGradient(colorIndex);
+            offsetSlider.OnValueChanged += _ => SetGradient(colorIndex);
+            softnessSlider.OnValueChanged += _ => SetGradient(colorIndex);
         }
+    }
+
+    private static Slider AddGradientSlider(BoxContainer parent, string label, float min, float max, float value, string format)
+    {
+        var valueLabel = new Label { Text = $"{label}: {value.ToString(format)}" };
+        var slider = new Slider
+        {
+            HorizontalExpand = true,
+            MinValue = min,
+            MaxValue = max,
+            Value = value,
+        };
+
+        slider.OnValueChanged += range =>
+        {
+            valueLabel.Text = $"{label}: {range.Value.ToString(format)}";
+        };
+
+        parent.AddChild(valueLabel);
+        parent.AddChild(slider);
+        return slider;
+    }
+
+    private void UpdateGradientControls(Marking marking, int colorIndex)
+    {
+        if (_gradientTypeButtons is null ||
+            _gradientColorSliders is null ||
+            _gradientAngleSliders is null ||
+            _gradientOffsetSliders is null ||
+            _gradientSoftnessSliders is null ||
+            _gradientColorContainers is null ||
+            _gradientSettingsContainers is null)
+            return;
+
+        var gradient = colorIndex < marking.MarkingGradients.Count
+            ? marking.MarkingGradients[colorIndex]
+            : MarkingGradient.None;
+
+        _gradientTypeButtons[colorIndex].SelectId((int) gradient.Type);
+        _gradientColorSliders[colorIndex].Color = gradient.Color;
+        _gradientAngleSliders[colorIndex].Value = gradient.Angle;
+        _gradientOffsetSliders[colorIndex].Value = gradient.Offset;
+        _gradientSoftnessSliders[colorIndex].Value = gradient.Softness;
+        SetGradientColorsVisible(colorIndex, gradient.Type != MarkingGradientType.None);
+    }
+
+    private void SetGradient(int colorIndex)
+    {
+        if (_updatingControls ||
+            _gradientTypeButtons is null ||
+            _gradientColorSliders is null ||
+            _gradientAngleSliders is null ||
+            _gradientOffsetSliders is null ||
+            _gradientSoftnessSliders is null)
+            return;
+
+        var type = (MarkingGradientType) _gradientTypeButtons[colorIndex].SelectedId;
+        SetGradientColorsVisible(colorIndex, type != MarkingGradientType.None);
+
+        var gradient = new MarkingGradient(
+            type,
+            _gradientColorSliders[colorIndex].Color,
+            _gradientAngleSliders[colorIndex].Value,
+            _gradientOffsetSliders[colorIndex].Value,
+            _gradientSoftnessSliders[colorIndex].Value);
+        _markingsModel.TrySetMarkingGradient(_organ, _layer, _markingPrototype.ID, colorIndex, gradient);
+    }
+
+    private void SetGradientColorsVisible(int colorIndex, bool visible)
+    {
+        if (_gradientColorContainers is null ||
+            _gradientSettingsContainers is null)
+            return;
+
+        _gradientColorContainers[colorIndex].Visible = visible;
+        _gradientSettingsContainers[colorIndex].Visible = visible;
     }
 
     public bool CheckMatchesSearch(string query)

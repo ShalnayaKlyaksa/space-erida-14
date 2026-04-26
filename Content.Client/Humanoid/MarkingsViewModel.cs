@@ -172,6 +172,7 @@ public sealed class MarkingsViewModel
 
             _organData = value;
             _previousColors.Clear();
+            _previousGradients.Clear();
             OrganDataChanged?.Invoke();
         }
     }
@@ -182,6 +183,7 @@ public sealed class MarkingsViewModel
     public event Action? OrganDataChanged;
 
     private readonly Dictionary<ProtoId<MarkingPrototype>, List<Color>> _previousColors = new();
+    private readonly Dictionary<ProtoId<MarkingPrototype>, List<MarkingGradient>> _previousGradients = new();
 
     public MarkingsViewModel()
     {
@@ -278,7 +280,9 @@ public sealed class MarkingsViewModel
 
         var colors = _previousColors.GetValueOrDefault(markingId) ??
                      MarkingColoring.GetMarkingLayerColors(markingProto, profileData.SkinColor, profileData.EyeColor, layerMarkings);
-        var newMarking = new Marking(markingId, colors) { Forced = AnyEnforcementsLifted };
+        var gradients = _previousGradients.GetValueOrDefault(markingId) ??
+                        Enumerable.Repeat(MarkingGradient.None, markingProto.Sprites.Count).ToList();
+        var newMarking = new Marking(markingId, colors, gradients) { Forced = AnyEnforcementsLifted };
 
         var limits = groupPrototype.Limits.GetValueOrDefault(layer);
         if (limits is null || !EnforceLimits)
@@ -355,6 +359,7 @@ public sealed class MarkingsViewModel
         if (layerMarkings.Find(marking => marking.MarkingId == markingId) is { } removingMarking)
         {
             _previousColors[removingMarking.MarkingId] = removingMarking.MarkingColors.ToList();
+            _previousGradients[removingMarking.MarkingId] = removingMarking.MarkingGradients.ToList();
         }
         layerMarkings.RemoveAll(marking => marking.MarkingId == markingId);
         MarkingsChanged?.Invoke(organ, layer);
@@ -385,6 +390,26 @@ public sealed class MarkingsViewModel
             return;
 
         markings[markingIdx] = markings[markingIdx].WithColorAt(colorIndex, color);
+        MarkingsChanged?.Invoke(organ, layer);
+    }
+
+    public void TrySetMarkingGradient(ProtoId<OrganCategoryPrototype> organ,
+        HumanoidVisualLayers layer,
+        ProtoId<MarkingPrototype> markingId,
+        int colorIndex,
+        MarkingGradient gradient)
+    {
+        if (!_markings.TryGetValue(organ, out var markingSet))
+            return;
+
+        if (!markingSet.TryGetValue(layer, out var markings))
+            return;
+
+        var markingIdx = markings.FindIndex(it => it.MarkingId == markingId);
+        if (markingIdx == -1)
+            return;
+
+        markings[markingIdx] = markings[markingIdx].WithGradientAt(colorIndex, gradient);
         MarkingsChanged?.Invoke(organ, layer);
     }
 

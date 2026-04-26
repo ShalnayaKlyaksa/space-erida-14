@@ -28,13 +28,13 @@ public sealed class WelderHeatingSystem : EntitySystem
 
     private void OnAfterInteract(Entity<WelderHeatingComponent> ent, ref AfterInteractEvent args)
     {
+        if (args.Handled || !args.CanReach || args.Target is not { } target)
+            return;
+
         if (TryComp<WelderComponent>(ent, out var welder) && !welder.Enabled)
             return;
 
         if (!HasComp<ItemComponent>(args.Target))
-            return;
-
-        if (args.Target is not { } target || !args.CanReach)
             return;
 
         if (!TryComp<SolutionContainerManagerComponent>(target, out var container))
@@ -43,6 +43,7 @@ public sealed class WelderHeatingSystem : EntitySystem
         if (!TryComp<HandsComponent>(args.User, out var hands) || !_sharedHandsSystem.IsHolding((args.User, hands), args.Target))
             return;
 
+        args.Handled = true;
         _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, args.User, ent.Comp.HeatDuration, new HeatingDoAfterEvent(), ent, target: target, used: ent)
         {
             BreakOnDamage = true,

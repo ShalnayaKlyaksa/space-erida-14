@@ -43,9 +43,9 @@ public sealed class WelderHeatingSystem : EntitySystem
         if (!TryComp<HandsComponent>(args.User, out var hands) || !_sharedHandsSystem.IsHolding((args.User, hands), args.Target))
             return;
 
-        args.Handled = true;
         _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, args.User, ent.Comp.HeatDuration, new HeatingDoAfterEvent(), ent, target: target, used: ent)
         {
+            AttemptFrequency = AttemptFrequency.EveryTick,
             BreakOnDamage = true,
             BreakOnMove = true,
             NeedHand = true,

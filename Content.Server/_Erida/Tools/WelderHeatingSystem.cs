@@ -73,6 +73,9 @@ public sealed class WelderHeatingSystem : EntitySystem
                 continue;
             _solutionContainer.AddThermalEnergy(soln, ent.Comp.HeatPerUse);
         }
+
+        args.Repeat = true;
+
         var msg = Loc.GetString("warming-with-welder",
             ("container", Name(target)),
             ("welder", Name(ent.Owner)));

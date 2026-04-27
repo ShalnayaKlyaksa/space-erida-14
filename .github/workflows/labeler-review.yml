@@ -11,13 +11,29 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: tspascoal/get-user-teams-membership@v3
-      id: checkUserMember
+    - name: Check user permission
+      id: checkPerm
+      uses: actions/github-script@v7
       with:
-        username: ${{ github.actor }}
-        team: "content-maintainers,junior-maintainers"
-        GITHUB_TOKEN: ${{ secrets.CHANGELOG_BOT_TOKEN }}
-    - if: ${{ steps.checkUserMember.outputs.isTeamMember == 'true' }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const username = context.actor;
+
+          const res = await github.rest.repos.getCollaboratorPermissionLevel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            username,
+          });
+
+          const perm = res.data.permission; // admin | write | read | none
+          console.log("Permission:", perm);
+
+          const allowed = (perm === "admin" || perm === "write");
+
+          core.setOutput("allowed", allowed);
+
+    - name: Add label if allowed
+      if: ${{ steps.checkPerm.outputs.allowed == 'true' }}
       uses: actions-ecosystem/action-add-labels@v1
       with:
         labels: "S: Approved"

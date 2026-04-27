@@ -531,3 +531,18 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/345
   avatar_url: https://avatars.githubusercontent.com/u/275415539?v=4
   title: Баф лазерного карабина 14-17, добавление режима "АВТО"; Нёрф флота НТ.
+- author: Tiwulovoe
+  changes:
+    - type: Tweak
+      message: Скафандры InteQ равны синдикату
+    - type: Tweak
+      message: SyndieElite 40 40 40 -> 50 50 50, замедление 10 -> 5
+    - type: Fix
+      message: >-
+        Исправлены резисты скафандра и куртки бригмедика, шлем пилота CБ, шинель
+        ГСБ
+  id: 48
+  time: '2026-04-27T21:46:58.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/348
+  avatar_url: https://avatars.githubusercontent.com/u/250869396?v=4
+  title: Kk

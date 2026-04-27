@@ -3,7 +3,7 @@
     <h3></h3>
 </div>
 
-<div align="center"> 
+<div align="center">
 
 ![](https://img.shields.io/github/last-commit/dead-space-server/space-erida-14?&style=for-the-badge&color=8ad7eb&logo=git&logoColor=D9E0EE&labelColor=1E202B)
 ![](https://img.shields.io/github/languages/top/dead-space-server/space-erida-14?&style=for-the-badge&color=8ad7eb&logo=git&logoColor=D9E0EE&labelColor=1E202B)
@@ -38,7 +38,7 @@
 <details>
 <summary>How to connect (SS14)</summary>
 
-- To connect to the server, use the following address: ```ss14s://erida.deadspace14.net``` 
+- To connect to the server, use the following address: ```ss14s://erida.deadspace14.net```
 - Open Space Station 14 and paste this link into the server browser or use direct connect.
 
 </details>
@@ -58,29 +58,29 @@
 <details>
 <summary>Build dependencies</summary>
 
-- Git  
+- Git
 - .NET SDK 10.0
 
 </details>
 <details>
 <summary>Windows</summary>
 
-1. Clone this repository  
-2. Run `Scripts/bat/updateEngine.bat` in a terminal or file explorer to download the engine  
-3. Run `Scripts/bat/buildAllDebug.bat` after making any changes to the source  
-4. Run `Scripts/bat/runQuickAll.bat` to launch the client and the server  
-5. Connect to localhost in the client and play  
+1. Clone this repository
+2. Run `Tools/RunScripts/bat/updateEngine.bat` in a terminal or file explorer to download the engine
+3. Run `Tools/RunScripts/bat/buildAllDebug.bat` after making any changes to the source
+4. Run `Tools/RunScripts/bat/runQuickAll.bat` to launch the client and the server
+5. Connect to localhost in the client and play
 
 </details>
 
 <details>
 <summary>Linux</summary>
 
-1. Clone this repository  
-2. Run `Scripts/sh/updateEngine.sh` in a terminal to download the engine  
-3. Run `Scripts/sh/buildAllDebug.sh` after making any changes to the source  
-4. Run `Scripts/sh/runQuickAll.sh` to launch the client and the server  
-5. Connect to localhost in the client and play  
+1. Clone this repository
+2. Run `Tools/RunScripts/sh/updateEngine.sh` in a terminal to download the engine
+3. Run `Tools/RunScripts/sh/buildAllDebug.sh` after making any changes to the source
+4. Run `Tools/RunScripts/sh/runQuickAll.sh` to launch the client and the server
+5. Connect to localhost in the client and play
 
 </details>
 
@@ -95,7 +95,7 @@
 ### Code
 This project is licensed under **AGPL-3.0-or-later**.
 
-Each file contains REUSE-compatible headers or `.license` files that may specify **dual licensing** options.  
+Each file contains REUSE-compatible headers or `.license` files that may specify **dual licensing** options.
 This allows parts of the codebase to be reused under alternative licenses where applicable.
 
 Full license texts can be found in the `LICENSES/` directory.
@@ -105,7 +105,7 @@ Full license texts can be found in the `LICENSES/` directory.
 ### Assets
 Most media assets are licensed under **CC-BY-SA 3.0**, unless stated otherwise.
 
-- Assets include their own license and copyright information in metadata files  
+- Assets include their own license and copyright information in metadata files
 - Example: [asset metadata](https://github.com/space-wizards/space-station-14/blob/master/Resources/Textures/Objects/Tools/crowbar.rsi/meta.json)
 
 ---
@@ -124,7 +124,7 @@ We organize borrowed content from other forks into dedicated subdirectories.
 
 This helps preserve proper attribution and reduces merge conflicts.
 
-Content inside these subdirectories originates from their respective forks and may include modifications.  
+Content inside these subdirectories originates from their respective forks and may include modifications.
 Changes are marked with comments around the edited lines.
 
 ---

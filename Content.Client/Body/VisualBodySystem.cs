@@ -240,7 +240,7 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
         var shaderName = effect.Type.ToString();
         var shader = _prototype.Index<ShaderPrototype>(shaderName).InstanceUnique();
-        shader.ApplyShaderParams(effect, GetTextureScale(sprite));
+        shader.ApplyShaderParams(effect, GetTextureScale(sprite, layerIndex));
         sprite.LayerSetShader(layerIndex, shader, shaderName);
 
         _sprite.LayerSetColor(target, layerId, Color.White);
@@ -251,8 +251,12 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
         return effect.Colors.TryGetValue("base", out var color) ? color : fallback;
     }
 
-    private static Vector2 GetTextureScale(SpriteComponent sprite)
+    private static Vector2 GetTextureScale(SpriteComponent sprite, int layerIndex)
     {
+        var layerSize = sprite[layerIndex].PixelSize;
+        if (layerSize.X > 0 && layerSize.Y > 0)
+            return new Vector2(layerSize.X, layerSize.Y);
+
         var width = sprite.AllLayers.Max(layer => layer.PixelSize.X);
         var height = sprite.AllLayers.Max(layer => layer.PixelSize.Y);
         return new Vector2(width, height);

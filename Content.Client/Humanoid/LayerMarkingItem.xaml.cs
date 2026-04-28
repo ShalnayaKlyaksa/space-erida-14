@@ -29,6 +29,7 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
     private readonly MarkingPrototype _markingPrototype;
     private readonly ProtoId<OrganCategoryPrototype> _organ;
     private readonly HumanoidVisualLayers _layer;
+    private readonly bool _shareEffectAcrossSprites; //Erida edit
     private bool _interactive;
 
     private List<MarkingEffectSelectorSliders>? _effectSliders; //Erida edit
@@ -49,6 +50,7 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
         _markingPrototype = prototype;
         _organ = organ;
         _layer = layer;
+        _shareEffectAcrossSprites = _layer == HumanoidVisualLayers.Tail; //Erida edit
         _interactive = interactive;
 
         UpdateData();
@@ -113,9 +115,9 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
             _effectSliders is { } sliders)
         {
             _updatingControls = true;
-            for (var i = 0; i < _markingPrototype.Sprites.Count && i < sliders.Count; i++)
+            for (var i = 0; i < GetEffectSelectorCount() && i < sliders.Count; i++)
             {
-                var effect = GetLayerEffect(marking, i);
+                var effect = GetLayerEffect(marking, GetEffectColorIndex(i));
                 sliders[i].CurrentType = effect.Type;
             }
             _updatingControls = false;
@@ -160,7 +162,7 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
 
         _effectSliders = new();
 
-        for (var i = 0; i < _markingPrototype.Sprites.Count; i++)
+        for (var i = 0; i < GetEffectSelectorCount(); i++)
         {
             var container = new BoxContainer()
             {
@@ -170,16 +172,10 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
 
             ColorsContainer.AddChild(container);
 
-            var label = _markingPrototype.Sprites[i] switch
-            {
-                SpriteSpecifier.Rsi rsi => Loc.GetString($"marking-{_markingPrototype.ID}-{rsi.RsiState}"),
-                SpriteSpecifier.Texture texture => Loc.GetString($"marking-{_markingPrototype.ID}-{texture.TexturePath.Filename}"),
-                _ => throw new InvalidOperationException("SpriteSpecifier not of known type"),
-            };
+            if (!_shareEffectAcrossSprites && TryGetSpriteLayerLabel(_markingPrototype, i, out var label))
+                container.AddChild(new Label { Text = label });
 
-            container.AddChild(new Label { Text = label });
-
-            var colorIndex = i;
+            var colorIndex = GetEffectColorIndex(i);
             var effectSelector = new MarkingEffectSelectorSliders(GetLayerEffect(marking, colorIndex).Clone())
             {
                 HorizontalExpand = true,
@@ -190,12 +186,35 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
                 if (_updatingControls)
                     return;
 
-                _markingsModel.TrySetMarkingEffect(_organ, _layer, _markingPrototype.ID, colorIndex, effect.Clone());
+                if (!_shareEffectAcrossSprites)
+                {
+                    _markingsModel.TrySetMarkingEffect(_organ, _layer, _markingPrototype.ID, colorIndex, effect.Clone());
+                    return;
+                }
+
+                for (var j = 0; j < _markingPrototype.Sprites.Count; j++)
+                {
+                    _markingsModel.TrySetMarkingEffect(_organ, _layer, _markingPrototype.ID, j, effect.Clone());
+                }
             };
 
             _effectSliders.Add(effectSelector);
             container.AddChild(effectSelector);
         }
+    }
+
+    private int GetEffectSelectorCount()
+    {
+        return _shareEffectAcrossSprites
+            ? 1
+            : _markingPrototype.Sprites.Count;
+    }
+
+    private int GetEffectColorIndex(int selectorIndex)
+    {
+        return _shareEffectAcrossSprites
+            ? 0
+            : selectorIndex;
     }
 
     private static MarkingEffect GetLayerEffect(Marking marking, int colorIndex)
@@ -208,6 +227,22 @@ public sealed partial class LayerMarkingItem : BoxContainer, ISearchableControl
             : Color.White;
 
         return new ColorMarkingEffect(color);
+    }
+
+    private static bool TryGetSpriteLayerLabel(MarkingPrototype marking, int colorIndex, out string label)
+    {
+        var locKey = marking.Sprites[colorIndex] switch
+        {
+            SpriteSpecifier.Rsi rsi => $"marking-{marking.ID}-{rsi.RsiState}",
+            SpriteSpecifier.Texture texture => $"marking-{marking.ID}-{texture.TexturePath.Filename}",
+            _ => throw new InvalidOperationException("SpriteSpecifier not of known type"),
+        };
+
+        if (Loc.TryGetString(locKey, out label!))
+            return true;
+
+        label = string.Empty;
+        return false;
     }
 
     //Erida end

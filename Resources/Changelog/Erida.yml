@@ -561,3 +561,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/347
   avatar_url: https://avatars.githubusercontent.com/u/230472830?v=4
   title: '[Add] Раса Резоми'
+- author: Sidzaru
+  changes:
+    - type: Add
+      message: 'Магазины патронов отображают в описании информацию о следующем патроне '
+  id: 50
+  time: '2026-04-28T12:16:01.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/349
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: Next ammo description

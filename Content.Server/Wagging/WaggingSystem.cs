@@ -1,4 +1,4 @@
-﻿using Content.Server.Actions;
+using Content.Server.Actions;
 using Content.Shared.Body;
 using Content.Shared.Cloning.Events;
 using Content.Shared.Humanoid.Markings;
@@ -121,7 +121,12 @@ public sealed class WaggingSystem : EntitySystem
                     continue;
                 }
 
-                layerMarkings[i] = new Marking(newMarkingId, layerMarkings[i].MarkingColors);
+                //Erida start
+                layerMarkings[i] = new Marking(newMarkingId, layerMarkings[i].MarkingColors, layerMarkings[i].MarkingEffects)
+                {
+                    Forced = layerMarkings[i].Forced,
+                };
+                //Erida end
             }
         }
 

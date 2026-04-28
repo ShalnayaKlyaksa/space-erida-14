@@ -3,10 +3,10 @@
   id: Human
   limits:
     enum.HumanoidVisualLayers.Hair:
-      limit: 10
+      limit: 1 #Erida edit
       required: false
     enum.HumanoidVisualLayers.FacialHair:
-      limit: 10
+      limit: 1 #Erida edit
       required: false
     enum.HumanoidVisualLayers.Chest:
       limit: 10

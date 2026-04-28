@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._Sunrise.MarkingEffects; //Erida edit
 using Content.Shared.Body;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
@@ -172,7 +173,7 @@ public sealed class MarkingsViewModel
 
             _organData = value;
             _previousColors.Clear();
-            _previousGradients.Clear();
+            _previousEffects.Clear(); //Erida edit
             OrganDataChanged?.Invoke();
         }
     }
@@ -183,7 +184,7 @@ public sealed class MarkingsViewModel
     public event Action? OrganDataChanged;
 
     private readonly Dictionary<ProtoId<MarkingPrototype>, List<Color>> _previousColors = new();
-    private readonly Dictionary<ProtoId<MarkingPrototype>, List<MarkingGradient>> _previousGradients = new();
+    private readonly Dictionary<ProtoId<MarkingPrototype>, List<MarkingEffect>> _previousEffects = new(); //Erida edit
 
     public MarkingsViewModel()
     {
@@ -280,9 +281,11 @@ public sealed class MarkingsViewModel
 
         var colors = _previousColors.GetValueOrDefault(markingId) ??
                      MarkingColoring.GetMarkingLayerColors(markingProto, profileData.SkinColor, profileData.EyeColor, layerMarkings);
-        var gradients = _previousGradients.GetValueOrDefault(markingId) ??
-                        Enumerable.Repeat(MarkingGradient.None, markingProto.Sprites.Count).ToList();
-        var newMarking = new Marking(markingId, colors, gradients) { Forced = AnyEnforcementsLifted };
+        //Erida start
+        var effects = _previousEffects.GetValueOrDefault(markingId) ??
+                      colors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
+        var newMarking = new Marking(markingId, colors, effects) { Forced = AnyEnforcementsLifted };
+        //Erida end
 
         var limits = groupPrototype.Limits.GetValueOrDefault(layer);
         if (limits is null || !EnforceLimits)
@@ -359,7 +362,9 @@ public sealed class MarkingsViewModel
         if (layerMarkings.Find(marking => marking.MarkingId == markingId) is { } removingMarking)
         {
             _previousColors[removingMarking.MarkingId] = removingMarking.MarkingColors.ToList();
-            _previousGradients[removingMarking.MarkingId] = removingMarking.MarkingGradients.ToList();
+            //Erida start
+            _previousEffects[removingMarking.MarkingId] = removingMarking.MarkingEffects.Select(effect => effect.Clone()).ToList();
+            //Erida end
         }
         layerMarkings.RemoveAll(marking => marking.MarkingId == markingId);
         MarkingsChanged?.Invoke(organ, layer);
@@ -393,11 +398,12 @@ public sealed class MarkingsViewModel
         MarkingsChanged?.Invoke(organ, layer);
     }
 
-    public void TrySetMarkingGradient(ProtoId<OrganCategoryPrototype> organ,
+    //Erida start
+    public void TrySetMarkingEffect(ProtoId<OrganCategoryPrototype> organ,
         HumanoidVisualLayers layer,
         ProtoId<MarkingPrototype> markingId,
         int colorIndex,
-        MarkingGradient gradient)
+        MarkingEffect effect)
     {
         if (!_markings.TryGetValue(organ, out var markingSet))
             return;
@@ -409,9 +415,10 @@ public sealed class MarkingsViewModel
         if (markingIdx == -1)
             return;
 
-        markings[markingIdx] = markings[markingIdx].WithGradientAt(colorIndex, gradient);
+        markings[markingIdx] = markings[markingIdx].WithMarkingEffectAt(colorIndex, effect);
         MarkingsChanged?.Invoke(organ, layer);
     }
+    //Erida end
 
     /// <summary>
     /// Ensures the markings within the model are valid.

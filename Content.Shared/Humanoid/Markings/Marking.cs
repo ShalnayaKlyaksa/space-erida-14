@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._Sunrise.MarkingEffects; //Erida edit
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
@@ -20,15 +21,18 @@ public partial record struct Marking
     [DataField("markingColor")]
     private List<Color> _markingColors;
 
-    [DataField("markingGradient")]
-    private List<MarkingGradient> _markingGradients;
+    //Erida start
+    private List<MarkingEffect> _markingEffects;
+    //Erida end
 
     /// <summary>
     /// The colors taken on by the marking
     /// </summary>
     public IReadOnlyList<Color> MarkingColors => _markingColors;
 
-    public IReadOnlyList<MarkingGradient> MarkingGradients => _markingGradients ?? [];
+    //Erida start
+    public IReadOnlyList<MarkingEffect> MarkingEffects => GetMarkingEffects();
+    //Erida end
 
     /// <summary>
     /// Whether the marking is forced regardless of points
@@ -38,25 +42,28 @@ public partial record struct Marking
     public Marking()
     {
         _markingColors = new();
-        _markingGradients = new();
+        _markingEffects = new(); //Erida edit
     }
 
     public Marking(ProtoId<MarkingPrototype> markingId, IEnumerable<Color> colors)
     {
         MarkingId = markingId;
         _markingColors = colors.ToList();
-        _markingGradients = Enumerable.Repeat(MarkingGradient.None, _markingColors.Count).ToList();
+        //Erida start
+        _markingEffects = _markingColors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
+        //Erida end
     }
 
-    public Marking(ProtoId<MarkingPrototype> markingId, IEnumerable<Color> colors, IEnumerable<MarkingGradient> gradients)
+    //Erida start
+    public Marking(ProtoId<MarkingPrototype> markingId, IEnumerable<Color> colors, IEnumerable<MarkingEffect> effects)
     {
         MarkingId = markingId;
         _markingColors = colors.ToList();
-        _markingGradients = gradients.ToList();
+        _markingEffects = effects.Select(effect => effect.Clone()).ToList();
 
-        if (_markingGradients.Count != _markingColors.Count)
-            _markingGradients = Enumerable.Repeat(MarkingGradient.None, _markingColors.Count).ToList();
+        EnsureEffectCount();
     }
+    //Erida end
 
     public Marking(ProtoId<MarkingPrototype> markingId, int colorsCount) : this(markingId,
         Enumerable.Repeat(Color.White, colorsCount).ToList())
@@ -67,32 +74,68 @@ public partial record struct Marking
     {
         return MarkingId.Equals(other.MarkingId)
             && MarkingColors.SequenceEqual(other.MarkingColors)
-            && MarkingGradients.SequenceEqual(other.MarkingGradients)
+            && MarkingEffects.Select(effect => effect.ToString()).SequenceEqual(other.MarkingEffects.Select(effect => effect.ToString())) //Erida edit
             && Forced.Equals(other.Forced);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(MarkingId, MarkingColors, MarkingGradients, Forced);
+        return HashCode.Combine(MarkingId, MarkingColors, string.Join(';', MarkingEffects.Select(effect => effect.ToString())), Forced); //Erida edit
+    }
+
+    //Erida start
+    private List<MarkingEffect> GetMarkingEffects()
+    {
+        if (_markingEffects?.Count == _markingColors.Count)
+            return _markingEffects;
+
+        return _markingColors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
     }
 
     public Marking WithColor(Color color) =>
-        this with { _markingColors = Enumerable.Repeat(color, MarkingColors.Count).ToList() };
+        this with
+        {
+            _markingColors = Enumerable.Repeat(color, MarkingColors.Count).ToList(),
+            _markingEffects = Enumerable.Repeat<MarkingEffect>(new ColorMarkingEffect(color), MarkingColors.Count)
+                .Select(effect => effect.Clone())
+                .ToList(),
+        };
+    //Erida end
 
     public Marking WithColorAt(int index, Color color)
     {
         var newColors = _markingColors.ShallowClone();
         newColors[index] = color;
-        return this with { _markingColors = newColors };
+
+        //Erida start
+        var newEffects = CloneEffects();
+        if (index < newEffects.Count)
+        {
+            if (newEffects[index] is ColorMarkingEffect)
+                newEffects[index] = new ColorMarkingEffect(color);
+            else
+                newEffects[index].Colors["base"] = color;
+        }
+
+        var marking = this with { _markingColors = newColors, _markingEffects = newEffects };
+        //Erida end
+
+        return marking;
     }
 
-    public Marking WithGradientAt(int index, MarkingGradient gradient)
+    //Erida start
+    public Marking WithMarkingEffectAt(int index, MarkingEffect effect)
     {
-        var newGradients = _markingGradients?.ShallowClone() ??
-            Enumerable.Repeat(MarkingGradient.None, MarkingColors.Count).ToList();
-        newGradients[index] = gradient;
-        return this with { _markingGradients = newGradients };
+        var newEffects = CloneEffects();
+        newEffects[index] = effect.Clone();
+
+        var newColors = _markingColors.ShallowClone();
+        if (effect.Colors.TryGetValue("base", out var color))
+            newColors[index] = color;
+
+        return this with { _markingColors = newColors, _markingEffects = newEffects };
     }
+    //Erida end
 
     // look this could be better but I don't think serializing
     // colors is the correct thing to do
@@ -110,83 +153,57 @@ public partial record struct Marking
         foreach (var color in MarkingColors)
             colorStringList.Add(color.ToHex());
 
-        return $"{sanitizedName}@{String.Join(',', colorStringList)}";
+        //Erida start
+        if (MarkingEffects.Count == 0)
+            return $"{sanitizedName}@{String.Join(',', colorStringList)}";
+
+        var effectString = string.Join(';', MarkingEffects.Select(effect => effect.ToString()));
+        return $"{sanitizedName}@{String.Join(',', colorStringList)}@{effectString}";
+        //Erida end
     }
 
     public static Marking? ParseFromDbString(string input)
     {
         if (input.Length == 0) return null;
         var split = input.Split('@');
-        if (split.Length != 2) return null;
+        if (split.Length < 2) return null; //Erida edit
         List<Color> colorList = new();
         foreach (string color in split[1].Split(','))
         {
             colorList.Add(Color.FromHex(color));
         }
 
-        return new Marking(split[0], colorList);
-    }
-}
+        if (split.Length == 2)
+            return new Marking(split[0], colorList);
 
-[DataDefinition, Serializable, NetSerializable]
-public partial record struct MarkingGradient
-{
-    public static readonly MarkingGradient None = new(MarkingGradientType.None, Color.White, 90f, 0f, 1f);
+        //Erida start
+        var effects = new List<MarkingEffect>();
+        foreach (var effectString in split[2].Split(';'))
+        {
+            if (MarkingEffect.Parse(effectString) is { } effect)
+                effects.Add(effect);
+        }
 
-    [DataField]
-    public MarkingGradientType Type;
-
-    [DataField]
-    public Color Color;
-
-    /// <summary>
-    /// Direction of the gradient in degrees. Radial gradients ignore this.
-    /// </summary>
-    [DataField]
-    public float Angle;
-
-    /// <summary>
-    /// Shifts the gradient center along its direction. Range is expected to be -1..1.
-    /// </summary>
-    [DataField]
-    public float Offset;
-
-    /// <summary>
-    /// Controls how soft the transition is. Lower values are sharper, higher values are smoother.
-    /// </summary>
-    [DataField]
-    public float Softness;
-
-    public MarkingGradient(MarkingGradientType type, Color color)
-        : this(type, color, DefaultAngle(type), 0f, 1f)
-    {
+        return new Marking(split[0], colorList, effects);
     }
 
-    public MarkingGradient(MarkingGradientType type, Color color, float angle, float offset, float softness)
+    private void EnsureEffectCount()
     {
-        Type = type;
-        Color = color;
-        Angle = angle;
-        Offset = offset;
-        Softness = softness;
+        if (_markingEffects.Count == _markingColors.Count)
+            return;
+
+        _markingEffects = _markingColors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
     }
 
-    public static float DefaultAngle(MarkingGradientType type) => type switch
+    private List<MarkingEffect> CloneEffects()
     {
-        MarkingGradientType.Horizontal => 0f,
-        MarkingGradientType.Diagonal => 45f,
-        MarkingGradientType.ReverseDiagonal => 135f,
-        _ => 90f,
-    };
-}
+        var effects = _markingEffects?.Select(effect => effect.Clone()).ToList() ??
+                      _markingColors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
 
-[Serializable, NetSerializable]
-public enum MarkingGradientType : byte
-{
-    None,
-    Vertical,
-    Horizontal,
-    Diagonal,
-    ReverseDiagonal,
-    Radial,
+        if (effects.Count != _markingColors.Count)
+            effects = _markingColors.Select(color => (MarkingEffect) new ColorMarkingEffect(color)).ToList();
+
+        return effects;
+    }
+    //Erida end
 }

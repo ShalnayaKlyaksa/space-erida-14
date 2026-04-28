@@ -1,4 +1,4 @@
-﻿markings-used = Используемые черты
+markings-used = Используемые черты
 markings-unused = Неиспользуемые черты
 markings-add = Добавить черту
 markings-remove = Убрать черту
@@ -58,17 +58,22 @@ markings-limits = { $required ->
 }
 
 markings-reorder = Изменить порядок черт
-markings-gradient = Градиент
-markings-gradient-color = Цвет перехода
-markings-gradient-angle = Направление
-markings-gradient-offset = Смещение
-markings-gradient-softness = Мягкость
-markings-gradient-None = Нет
-markings-gradient-Vertical = Вертикальный
-markings-gradient-Horizontal = Горизонтальный
-markings-gradient-Diagonal = Диагональный
-markings-gradient-ReverseDiagonal = Обратная диагональ
-markings-gradient-Radial = Радиальный
+#Erida start
+marking-effect-type-color = Цвет
+marking-effect-type-gradient = Градиент
+marking-effect-type-roughgradient = Грубый градиент
+marking-effect-color-color-base = Основной
+marking-effect-gradient-color-base = Основной
+marking-effect-gradient-color-gradient = Градиент
+marking-effect-gradient-parameter-offset = Смещение
+marking-effect-gradient-parameter-size = Размер
+marking-effect-gradient-parameter-rotation = Поворот
+marking-effect-gradient-parameter-pixelation = Пикселизация
+marking-effect-gradient-parameter-mirror = Отражение
+marking-effect-roughgradient-color-base = Основной
+marking-effect-roughgradient-color-gradient = Градиент
+marking-effect-roughgradient-parameter-horizontal = Горизонтальный
+#Erida end
 
 humanoid-marking-modifier-respect-limits = Соблюдать ограничения
 humanoid-marking-modifier-respect-group-sex = Учитывать ограничения по группе и полу

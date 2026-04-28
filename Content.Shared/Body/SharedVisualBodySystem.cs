@@ -55,7 +55,7 @@ public abstract partial class SharedVisualBodySystem : EntitySystem
                 eyeColor,
                 ret);
 
-            var markingWithColor = new Marking(marking.MarkingId, colors, marking.MarkingGradients)
+            var markingWithColor = new Marking(marking.MarkingId, colors, marking.MarkingEffects) //Erida edit
             {
                 Forced = marking.Forced,
             };

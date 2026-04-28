@@ -19,17 +19,22 @@ markings-limits = { $required ->
     }
 }
 markings-reorder = Reorder markings
-markings-gradient = Gradient
-markings-gradient-color = Fade color
-markings-gradient-angle = Direction
-markings-gradient-offset = Offset
-markings-gradient-softness = Softness
-markings-gradient-None = None
-markings-gradient-Vertical = Vertical
-markings-gradient-Horizontal = Horizontal
-markings-gradient-Diagonal = Diagonal
-markings-gradient-ReverseDiagonal = Reverse diagonal
-markings-gradient-Radial = Radial
+#Erida start
+marking-effect-type-color = Color
+marking-effect-type-gradient = Gradient
+marking-effect-type-roughgradient = Rough gradient
+marking-effect-color-color-base = Base
+marking-effect-gradient-color-base = Base
+marking-effect-gradient-color-gradient = Gradient
+marking-effect-gradient-parameter-offset = Offset
+marking-effect-gradient-parameter-size = Size
+marking-effect-gradient-parameter-rotation = Rotation
+marking-effect-gradient-parameter-pixelation = Pixelation
+marking-effect-gradient-parameter-mirror = Mirror
+marking-effect-roughgradient-color-base = Base
+marking-effect-roughgradient-color-gradient = Gradient
+marking-effect-roughgradient-parameter-horizontal = Horizontal
+#Erida end
 
 humanoid-marking-modifier-respect-limits = Respect limits
 humanoid-marking-modifier-respect-group-sex = Respect group & sex restrictions

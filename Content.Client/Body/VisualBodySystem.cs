@@ -1,4 +1,8 @@
 using System.Linq;
+//Erida start
+using Content.Client._Sunrise.MarkingEffectsClient;
+using Content.Shared._Sunrise.MarkingEffects;
+//Erida end
 using Content.Shared.Body;
 using Content.Shared.CCVar;
 using Content.Shared.Humanoid.Markings;
@@ -16,16 +20,11 @@ namespace Content.Client.Body;
 
 public sealed class VisualBodySystem : SharedVisualBodySystem
 {
-    private static readonly ProtoId<ShaderPrototype> MarkingGradientShader = "MarkingGradient";
-
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly MarkingManager _marking = default!;
     [Dependency] private readonly SpriteSystem _sprite = default!;
     [Dependency] private readonly IEntityManager _entityManager = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
-
-    private readonly Dictionary<EntityUid, Direction> _lastGradientDirections = new();
 
     public override void Initialize()
     {
@@ -43,28 +42,6 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
         Subs.CVar(_cfg, CCVars.AccessibilityClientCensorNudity, OnCensorshipChanged, true);
         Subs.CVar(_cfg, CCVars.AccessibilityServerCensorNudity, OnCensorshipChanged, true);
-    }
-
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-
-        var query = EntityQueryEnumerator<OrganComponent, VisualOrganMarkingsComponent>();
-        while (query.MoveNext(out var uid, out var organComp, out var markingsComp))
-        {
-            if (organComp.Body is not { } body)
-                continue;
-
-            if (!HasGradients(markingsComp.AppliedMarkings))
-                continue;
-
-            var direction = GetGradientDirection(body);
-            if (_lastGradientDirections.TryGetValue(uid, out var lastDirection) && lastDirection == direction)
-                continue;
-
-            _lastGradientDirections[uid] = direction;
-            RefreshMarkingGradients((uid, markingsComp), body);
-        }
     }
 
     private void OnCensorshipChanged(bool value)
@@ -226,115 +203,63 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
                     _sprite.LayerSetSprite(target, layerId, rsi);
                 }
 
-                ScaleProfile(target); // Erida edit
+                ScaleProfile(target); //Erida edit
 
                 var color = marking.MarkingColors is not null && i < marking.MarkingColors.Count
                     ? marking.MarkingColors[i]
                     : Color.White;
-                var gradient = marking.MarkingGradients is not null && i < marking.MarkingGradients.Count
-                    ? marking.MarkingGradients[i]
-                    : MarkingGradient.None;
+                //Erida start
+                var effect = marking.MarkingEffects is not null && i < marking.MarkingEffects.Count
+                    ? marking.MarkingEffects[i]
+                    : new ColorMarkingEffect(color);
 
-                ApplyMarkingColor(target, layerIndex, layerId, color, gradient);
+                ApplyMarkingEffect(target, layerIndex, layerId, color, effect);
+                //Erida end
             }
 
             applied.Add(marking);
         }
         ent.Comp.AppliedMarkings = applied;
-        _lastGradientDirections[ent.Owner] = GetGradientDirection(target);
     }
 
-    private void RefreshMarkingGradients(Entity<VisualOrganMarkingsComponent> ent, EntityUid target)
-    {
-        foreach (var marking in ent.Comp.AppliedMarkings)
-        {
-            if (!HasGradient(marking))
-                continue;
-
-            if (!_marking.TryGetMarking(marking, out var proto))
-                continue;
-
-            for (var i = 0; i < proto.Sprites.Count; i++)
-            {
-                var sprite = proto.Sprites[i];
-                if (sprite is not SpriteSpecifier.Rsi rsi)
-                    continue;
-
-                var gradient = marking.MarkingGradients is not null && i < marking.MarkingGradients.Count
-                    ? marking.MarkingGradients[i]
-                    : MarkingGradient.None;
-
-                if (gradient.Type == MarkingGradientType.None)
-                    continue;
-
-                var layerId = $"{proto.ID}-{rsi.RsiState}";
-                if (!_sprite.LayerMapTryGet(target, layerId, out var layerIndex, false))
-                    continue;
-
-                var color = marking.MarkingColors is not null && i < marking.MarkingColors.Count
-                    ? marking.MarkingColors[i]
-                    : Color.White;
-
-                ApplyMarkingColor(target, layerIndex, layerId, color, gradient);
-            }
-        }
-    }
-
-    private void ApplyMarkingColor(EntityUid target, int layerIndex, string layerId, Color color, MarkingGradient gradient)
+    //Erida start
+    private void ApplyMarkingEffect(EntityUid target, int layerIndex, string layerId, Color color, MarkingEffect effect)
     {
         if (!TryComp<SpriteComponent>(target, out var sprite))
         {
-            _sprite.LayerSetColor(target, layerId, color);
+            _sprite.LayerSetColor(target, layerId, GetBaseColor(effect, color));
             return;
         }
 
-        if (gradient.Type == MarkingGradientType.None)
+        if (effect.Type == MarkingEffectType.Color)
         {
             sprite.LayerSetShader(layerIndex, null, null);
-            _sprite.LayerSetColor(target, layerId, color);
+            _sprite.LayerSetColor(target, layerId, GetBaseColor(effect, color));
             return;
         }
 
-        var shader = _prototype.Index(MarkingGradientShader).InstanceUnique();
-        shader.SetParameter("startColor", ToVector4(color));
-        shader.SetParameter("endColor", ToVector4(gradient.Color));
-        shader.SetParameter("gradientType", (float) gradient.Type);
-        shader.SetParameter("gradientAngle", GetFacingGradientAngle(target, gradient.Angle));
-        shader.SetParameter("gradientOffset", gradient.Offset);
-        shader.SetParameter("gradientSoftness", gradient.Softness);
-        sprite.LayerSetShader(layerIndex, shader, MarkingGradientShader.Id);
+        var shaderName = effect.Type.ToString();
+        var shader = _prototype.Index<ShaderPrototype>(shaderName).InstanceUnique();
+        shader.ApplyShaderParams(effect, GetTextureScale(sprite));
+        sprite.LayerSetShader(layerIndex, shader, shaderName);
+
         _sprite.LayerSetColor(target, layerId, Color.White);
     }
 
-    private float GetFacingGradientAngle(EntityUid target, float angle)
+    private static Color GetBaseColor(MarkingEffect effect, Color fallback)
     {
-        return angle + (float) GetGradientDirection(target).ToAngle().Degrees;
+        return effect.Colors.TryGetValue("base", out var color) ? color : fallback;
     }
 
-    private Direction GetGradientDirection(EntityUid target)
+    private static Vector2 GetTextureScale(SpriteComponent sprite)
     {
-        if (TryComp<SpriteComponent>(target, out var sprite) && sprite.EnableDirectionOverride)
-            return sprite.DirectionOverride;
-
-        return _transform.GetWorldRotation(Transform(target)).GetDir();
+        var width = sprite.AllLayers.Max(layer => layer.PixelSize.X);
+        var height = sprite.AllLayers.Max(layer => layer.PixelSize.Y);
+        return new Vector2(width, height);
     }
+    //Erida end
 
-    private static bool HasGradients(IEnumerable<Marking> markings)
-    {
-        return markings.Any(HasGradient);
-    }
-
-    private static bool HasGradient(Marking marking)
-    {
-        return marking.MarkingGradients.Any(gradient => gradient.Type != MarkingGradientType.None);
-    }
-
-    private static Vector4 ToVector4(Color color)
-    {
-        return new Vector4(color.R, color.G, color.B, color.A);
-    }
-
-    // Erida start
+    //Erida start
     private void ScaleProfile(EntityUid target)
     {
         var humanoidProfile = _entityManager.GetComponent<HumanoidProfileComponent>(target);
@@ -346,7 +271,7 @@ public sealed class VisualBodySystem : SharedVisualBodySystem
 
         _sprite.SetScale((target, humanoidSprite), new Vector2(width, height));
     }
-    // Erida end
+    //Erida end
 
     private void RemoveMarkings(Entity<VisualOrganMarkingsComponent> ent, EntityUid target)
     {

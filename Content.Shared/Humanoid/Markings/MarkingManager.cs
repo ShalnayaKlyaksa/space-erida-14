@@ -148,7 +148,7 @@ public sealed class MarkingManager
                 }
 
                 if (marking.Sprites.Count != markings[i].MarkingColors.Count ||
-                    marking.Sprites.Count != markings[i].MarkingGradients.Count)
+                    marking.Sprites.Count != markings[i].MarkingEffects.Count) //Erida edit
                 {
                     markings[i] = new Marking(marking.ID, marking.Sprites.Count);
                 }

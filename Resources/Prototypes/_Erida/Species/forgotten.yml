@@ -1,0 +1,8 @@
+- type: species
+  id: Forgotten
+  name: species-name-forgotten
+  roundStart: false
+  prototype: MobForgotten
+  dollPrototype: AppearanceForgotten
+  skinColoration: Hues
+  defaultSkinTone: "#CCCCCC"

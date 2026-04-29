@@ -570,3 +570,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/349
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: Next ammo description
+- author: Sidzaru
+  changes:
+    - type: Tweak
+      message: Маперы доработали и исправили трейн
+  id: 51
+  time: '2026-04-29T19:41:38.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/353
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: Train update

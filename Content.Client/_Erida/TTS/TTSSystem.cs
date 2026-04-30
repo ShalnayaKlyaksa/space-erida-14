@@ -1,4 +1,4 @@
-﻿using Content.Shared.Chat;
+using Content.Shared.Chat;
 using Content.Shared._Erida.TTS;
 using Content.Shared.GameTicking;
 using Robust.Client.Audio;
@@ -89,7 +89,7 @@ public sealed class TTSSystem : EntitySystem
         if (ev.SourceUid != null)
         {
             var sourceUid = GetEntity(ev.SourceUid.Value);
-            if(sourceUid.IsValid())
+            if (sourceUid.IsValid())
                 _audio.PlayEntity(audioResource.AudioStream, sourceUid, null, audioParams);
         }
         else
@@ -102,7 +102,7 @@ public sealed class TTSSystem : EntitySystem
 
     private float AdjustVolume(bool isWhisper)
     {
-        var volume = Math.Max(MinimalVolume, SharedAudioSystem.GainToVolume(_volume));
+        var volume = MinimalVolume + SharedAudioSystem.GainToVolume(_volume);
 
         if (isWhisper)
         {

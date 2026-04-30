@@ -579,3 +579,18 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/353
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: Train update
+- author: Sidzaru
+  changes:
+    - type: Add
+      message: Добавлены угловые тайлы
+    - type: Add
+      message: Добавлена система отображения угловых тайлов на сканерах
+    - type: Add
+      message: >-
+        Добавлены спец. маркеры для более детального мапинга внешнего вида на
+        сканерах масс
+  id: 52
+  time: '2026-04-30T03:28:29.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/355
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: Tiles

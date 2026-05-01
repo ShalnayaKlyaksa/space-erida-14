@@ -603,3 +603,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/356
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: '[Add] Copy decal system'
+- author: Tiwulovoe
+  changes:
+    - type: Add
+      message: Порт системы позирования с ADT
+  id: 54
+  time: '2026-05-01T23:07:03.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/350
+  avatar_url: https://avatars.githubusercontent.com/u/250869396?v=4
+  title: Posing

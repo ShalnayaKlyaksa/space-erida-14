@@ -1,4 +1,4 @@
-cd ../../
+cd ../../../
 
 mkdir Scripts/logs
 

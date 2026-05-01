@@ -5,7 +5,7 @@ if [ "$(dirname $0)" != "." ]; then
     cd "$(dirname $0)"
 fi
 
-cd ../../
+cd ../../../
 
 git submodule update --init --recursive
 dotnet build -c Debug

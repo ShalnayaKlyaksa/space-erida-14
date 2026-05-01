@@ -1,5 +1,5 @@
 @echo off
-cd ../../
+cd ../../../
 
 call dotnet run --project Content.Server --no-build %*
 

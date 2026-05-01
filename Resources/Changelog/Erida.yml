@@ -594,3 +594,12 @@ Entries:
   url: https://github.com/dead-space-server/space-erida-14/pull/355
   avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
   title: Tiles
+- author: Sidzaru
+  changes:
+    - type: Add
+      message: ' '
+  id: 53
+  time: '2026-05-01T23:05:48.0000000+00:00'
+  url: https://github.com/dead-space-server/space-erida-14/pull/356
+  avatar_url: https://avatars.githubusercontent.com/u/110207359?v=4
+  title: '[Add] Copy decal system'

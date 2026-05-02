@@ -146,6 +146,7 @@ Changes are marked with comments around the edited lines.
 | `Nyanotrasen` | Nyanotrasen | https://github.com/Nyanotrasen/Nyanotrasen | MIT |
 | `Orion` | Orion Station | https://github.com/AtaraxiaSpaceFoundation/Orion-Station-14 | AGPL 3.0 |
 | `_White` | WhiteDream | https://github.com/WWhiteDreamProject/wwdpublic | AGPL 3.0 |
+| `_Wega` | Corvax Wega | https://github.com/wega-team/ss14-wega | GPL 3.0 |
 
 ---
 

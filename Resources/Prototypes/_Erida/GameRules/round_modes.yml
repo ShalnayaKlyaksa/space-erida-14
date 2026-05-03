@@ -245,7 +245,7 @@
   id: EridaSurvivalDynamicRule
   components:
   - type: GameRule
-    minPlayers: 1
+    minPlayers: 0
   - type: DynamicRule
     budgetPerSecond: 0.11
     startingBudgetMin: 320

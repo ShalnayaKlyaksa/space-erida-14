@@ -181,7 +181,8 @@ public sealed class AudioEffectSystem : EntitySystem
             return true;
 
         // resolve the cached auxiliary
-        if (!_cachedBlankAuxiliaryUid.IsValid())
+        if (!_cachedBlankAuxiliaryUid.IsValid() ||
+            !HasComp<AudioAuxiliaryComponent>(_cachedBlankAuxiliaryUid))
             _cachedBlankAuxiliaryUid = _audioSystem.CreateAuxiliary().Entity;
 
         _audioSystem.SetAuxiliary(entity, entity.Comp, _cachedBlankAuxiliaryUid);
@@ -204,6 +205,15 @@ public sealed class AudioEffectSystem : EntitySystem
 
         if (CachedEffects.TryGetValue(preset, out var cached))
         {
+            if (!IsCachedEffectValid(cached))
+            {
+                TryQueueDel(cached.AuxiliaryUid);
+                TryQueueDel(cached.EffectUid);
+                CachedEffects.Remove(preset);
+
+                return TryCacheEffect(preset, out auxiliaryUid, out effectUid);
+            }
+
             auxiliaryUid = cached.AuxiliaryUid;
             effectUid = cached.EffectUid;
             return true;
@@ -256,5 +266,11 @@ public sealed class AudioEffectSystem : EntitySystem
         auxiliaryUid = auxiliaryPair.Entity;
 
         return CachedEffects.TryAdd(preset, (auxiliaryPair.Entity, effectPair.Entity));
+    }
+
+    private bool IsCachedEffectValid((EntityUid AuxiliaryUid, EntityUid EffectUid) cached)
+    {
+        return HasComp<AudioAuxiliaryComponent>(cached.AuxiliaryUid) &&
+               HasComp<AudioEffectComponent>(cached.EffectUid);
     }
 }

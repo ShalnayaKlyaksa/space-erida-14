@@ -3,6 +3,7 @@ using Content.Shared._Erida.Language.Events;
 using Content.Shared._Erida.Language.Systems;
 using Robust.Client;
 using Robust.Shared.Prototypes;
+using Timer = Robust.Shared.Timing.Timer;
 
 namespace Content.Client._Erida.Language.Systems;
 
@@ -31,6 +32,7 @@ public sealed class LanguageSystem : SharedLanguageSystem
     public List<ProtoId<LanguagePrototype>> UnderstoodLanguages { get; private set; } = new();
 
     public event EventHandler<LanguagesUpdatedMessage>? OnLanguagesChanged;
+    private bool _stateUpdateQueued;
 
     public override void Initialize()
     {
@@ -55,7 +57,22 @@ public sealed class LanguageSystem : SharedLanguageSystem
     {
         // Request an update when entering a game
         if (args.NewLevel == ClientRunLevel.InGame)
-            RequestStateUpdate();
+            QueueStateUpdate();
+    }
+
+    private void QueueStateUpdate()
+    {
+        if (_stateUpdateQueued)
+            return;
+
+        _stateUpdateQueued = true;
+        Timer.Spawn(TimeSpan.FromMilliseconds(100), () =>
+        {
+            _stateUpdateQueued = false;
+
+            if (_client.RunLevel == ClientRunLevel.InGame)
+                RequestStateUpdate();
+        });
     }
 
     /// <summary>

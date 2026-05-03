@@ -3,7 +3,9 @@
   id: DynamicRule
   components:
   - type: GameRule
-    minPlayers: 5 # <5 is greenshift hours, buddy.
+    # Erida Extended reuses this rule as a nested difficulty option,
+    # so it needs to stay startable on low population too.
+    minPlayers: 1
   - type: DynamicRule
     startingBudgetMin: 200
     startingBudgetMax: 350
@@ -110,10 +112,3 @@
             min: 20
           - !type:RoundDurationCondition
             min: 4800 # 80 minutes Erida edit
-        # - id: NightmareSpawn # Erida-edit
-        #   weight: 15
-        #   conditions:
-        #   - !type:HasBudgetCondition
-        #   - !type:MaxRuleOccurenceCondition
-        #   - !type:RoundDurationCondition
-        #     min: 3600 # 60 minutes Erida edit

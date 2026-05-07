@@ -109,13 +109,6 @@
           conditions:
           - !type:HasBudgetCondition
           - !type:MaxRuleOccurenceCondition
-        - id: Revolutionary
-          weight: 15
-          conditions:
-          - !type:HasBudgetCondition
-          - !type:MaxRuleOccurenceCondition
-          - !type:PlayerCountCondition
-            min: 15
       - !type:GroupSelector
         conditions:
         - !type:RoundDurationCondition
@@ -167,32 +160,6 @@
           conditions:
           - !type:HasBudgetCondition
           - !type:MaxRuleOccurenceCondition
-        - id: Revolutionary
-          weight: 15
-          conditions:
-          - !type:HasBudgetCondition
-          - !type:MaxRuleOccurenceCondition
-        - id: Zombie
-          weight: 10
-          conditions:
-          - !type:HasBudgetCondition
-          - !type:MaxRuleOccurenceCondition
-          - !type:PlayerCountCondition
-            min: 20
-        - id: Wizard
-          weight: 10
-          conditions:
-          - !type:HasBudgetCondition
-          - !type:MaxRuleOccurenceCondition
-          - !type:PlayerCountCondition
-            min: 15
-        - id: Nukeops
-          weight: 5
-          conditions:
-          - !type:HasBudgetCondition
-          - !type:MaxRuleOccurenceCondition
-          - !type:PlayerCountCondition
-            min: 25
       - !type:GroupSelector
         conditions:
         - !type:RoundDurationCondition
@@ -234,8 +201,8 @@
           conditions:
           - !type:HasBudgetCondition
           - !type:MaxRuleOccurenceCondition
-        - id: WizardSpawn
-          weight: 10
+        - id: NightmareSpawn
+          weight: 15
           conditions:
           - !type:HasBudgetCondition
           - !type:MaxRuleOccurenceCondition
@@ -281,20 +248,7 @@
         conditions:
         - !type:HasBudgetCondition
         - !type:MaxRuleOccurenceCondition
-      - id: Zombie
-        weight: 10
-        conditions:
-        - !type:HasBudgetCondition
-        - !type:MaxRuleOccurenceCondition
-        - !type:PlayerCountCondition
-          min: 20
-      - id: Wizard
-        weight: 10
-        conditions:
-        - !type:HasBudgetCondition
-        - !type:MaxRuleOccurenceCondition
-        - !type:PlayerCountCondition
-          min: 10
+        min: 20
     - !type:GroupSelector
       conditions:
       - !type:RoundDurationCondition
@@ -343,6 +297,11 @@
         - !type:MaxRuleOccurenceCondition
       - id: WizardSpawn
         weight: 10
+        conditions:
+        - !type:HasBudgetCondition
+        - !type:MaxRuleOccurenceCondition
+      - id: NightmareSpawn
+        weight: 15
         conditions:
         - !type:HasBudgetCondition
         - !type:MaxRuleOccurenceCondition
